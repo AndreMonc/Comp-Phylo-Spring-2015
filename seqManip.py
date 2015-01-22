@@ -13,7 +13,7 @@ length_dna_sequence = len(dna_sequence)
 # Print length of DNA sequence
 print("Length of DNA sequence: " + str(length_dna_sequence))
 
-# Define equivalent RNA sequence (changing thymine to uracil)
+# Define equivalent RNA sequence (change thymine to uracil)
 equivalent_rna_sequence = dna_sequence.replace("t","u")
 
 # Print equivalent RNA sequence
