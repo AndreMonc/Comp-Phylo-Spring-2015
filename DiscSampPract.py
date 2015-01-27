@@ -60,7 +60,7 @@ from (2a) and (2b) for different values of n and k. Try some really big values
 there is a noticeable difference in speed between the (2a) and (2b) function. 
 Which one is faster? By roughly how much?
 """
-"""
+
 # Comparison Number 1
 import time
 start1 = time.time()
@@ -76,24 +76,24 @@ TimeBinomialCoeffFast = end2 - start2
 print("Speed of calculation using BinomialCoeffFast function (n=50000,k=3000): " + str(TimeBinomialCoeffFast))
 #0.0099 sec
 # 2b function is ~1.66 seconds faster
-"""
-"""
+
+
 # Comparison Number 2
 import time
 start3 = time.time()
-#print(BinomialCoeff(70000,30000))
+print(BinomialCoeff(70000,30000))
 end3 = time.time()
 TimeBinomialCoeff = end3 - start3
-#print("Speed of calculation using BinomialCoeff function (n=70000,k=30000): " + str(TimeBinomialCoeff))
+print("Speed of calculation using BinomialCoeff function (n=70000,k=30000): " + str(TimeBinomialCoeff))
 #2.6709 sec
 start4 = time.time()
-#print(BinomialCoeffFast(70000,30000))
+print(BinomialCoeffFast(70000,30000))
 end4 = time.time()
 TimeBinomialCoeffFast = end4 - start4
-#print("Speed of calculation using BinomialCoeffFast function (n=70000,k=30000): " + str(TimeBinomialCoeffFast))
+print("Speed of calculation using BinomialCoeffFast function (n=70000,k=30000): " + str(TimeBinomialCoeffFast))
 #0.6909 sec
 # 2b function is 1.98 seconds faster
-"""
+
 # 4.
 """
 Use either function (2a) or (2b) to write a function that calculates the 
@@ -171,6 +171,7 @@ z = DiscreteSample(SitesOrig,ListOfProb,numbOfTrial)
 z = z[0]
 print z
 """
+# Next attempt here seems to work--heavily based on Oscar's code
 import numpy
 list1 = []
 list2 = []
@@ -200,14 +201,15 @@ print("Number of type 2 sites: " + str(NewAlignment.count(2)))
 list1 = []
 list2 = []
 
-howMany = input("how many times would you like to run the simulation? ")
-NewValue = MultipleSeqAlign(howMany)
+#howMany = input("how many times would you like to run the simulation? ")
+#NewValue = MultipleSeqAlign(howMany)
+MultipleSeqAlign(100)
 
-print "List of type 1 sites in each repeat: ", list1
-print "List of type 2 sites in each repeat: ", list2
+print "List of number of type 1 sites in each of 100 repeats: ", list1
+print "List of number of type 2 sites in each of 100 repeats: ", list2
 
 """
-failed way below ...
+failed code below ...
 for i in range(100):
     SitesOrig=[1,2]
     ListOfProb=[0.5,0.5]
@@ -235,9 +237,10 @@ plt.hist(list1)
 print("Histogram of type 2 distribution for 100 repeats") 
 plt.hist(list2)
 
+'''
 #now to find proportion
 proportions = []
-for i in range(0,100):
+for i in range(0,len(list1)):
     if list1[i] > list2[i]:
         x = float(list2[i] / list1[i])
         proportions.append(x)
@@ -246,31 +249,57 @@ for i in range(0,100):
         proportions.append(x)
 
 plt.hist(proportions)
-plt.xlabel("proportions type 1 and type 2 sites")
+plt.xlabel("proportion of two sites")
 plt.ylabel("frequency")
 #weird histogram output! One outlier?
- 
+'''
+
 # 9.
 '''Calculate the probabilities of the proportions you saw in (8) using the 
-binomial probability mass function (PMF) from (4).'''
+binomial probability mass function (PMF) from (4) (which calculates the 
+probability of k successes in n Bernoulli trials with probability p).'''
+
 BernoulliProb = []
 
-###Could not complete this problem.
-
-for val in proportions:
+for val in list1:
     n=400
     p=0.5
     k=val
-    BernoulliList.append(BernTrial(n,p,k))
+    BernoulliProb.append(BernTrial(n,p,k))
     
-print BernoulliList
-    
+print BernoulliProb
+  
 
 # 10.
 '''Compare your results from (8) and (9).'''
+plt.hist(BernoulliProb)
+plt.xlabel("K success (type 1 site)")
+plt.ylabel("Probability Mass Function")
+
 
 # 11.
 '''Repeat 7-10, but use 10,000 trials.'''
 
+list1 = []
+list2 = []
+MultipleSeqAlign(10000)
+print "List of type 1 sites in each of 10000 repeats: ", list1
+print "List of type 2 sites in each of 10000 repeats: ", list2
+
+import matplotlib.pyplot as plt
+print("Histogram of type 1 distribution for 10000 repeats") 
+plt.hist(list1)
+print("Histogram of type 2 distribution for 10000 repeats") 
+plt.hist(list2)
+BernoulliProb = []
+
+for val in list1:
+    n=400
+    p=0.5
+    k=val
+    BernoulliProb.append(BernTrial(n,p,k))
+    
+print BernoulliProb
+    
     
     
