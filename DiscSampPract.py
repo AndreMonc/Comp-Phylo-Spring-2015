@@ -16,6 +16,8 @@ but not necessarily going all the way to 1). This calculation would look
 like max * max-1 * max-2 * ... * min.
 """
 
+#Defining new function. The two-part argument is inclusive for min
+#but exclusive for max. I therefore make the product variable to equal max.
 def SeriesMult(min,max): # SeriesMult stands for series multiplier
     product = max
     for integer in range(min,max):
@@ -35,6 +37,8 @@ avoid unnecessary multiplication (see the middle expression in Theorem 1.4.13).
 """     
     # 2a. 
 def BinomialCoeff(n,k): 
+# Just using a simple if/else designation so that the code knows how to hand 
+# different values of k.    
     if k>n:
         return 0
     else:
@@ -46,6 +50,7 @@ print(BinomialCoeff(5,2))
     # 2b.
 def BinomialCoeffFast(n,k): #Binomial Coefficient Fast cancels identical terms 
 # in numerator and denominator and therefore bipasses unnecessary multiplication.
+# As shown in the next step, this function is noticeably faster in its calculations.
     if k>n:
         return 0
     else:
@@ -62,6 +67,7 @@ Which one is faster? By roughly how much?
 """
 
 # Comparison Number 1
+# Not to self: When timing events, import time
 import time
 start1 = time.time()
 print(BinomialCoeff(50000,3000))
@@ -101,11 +107,14 @@ probability of k successes in n Bernoulli trials with probability p. This is
 called the Binomial(n,p) distribution. See Theorem 3.3.5 for the necessary 
 equation. Hint: pow(x,y) returns x^y (x raised to the power of y).
 """
+#So, perhaps I should have named this function BinomialDistribution or 
+# binomialPMF?
 def BernTrial(n,p,k):
     if k<0 or k>n:
         return 0
     else: 
         Binomcoeff = BinomialCoeffFast(n,k)       
+        #Pofk refers to the probability of k success in n Bernoulli trials
         Pofk = Binomcoeff*(pow(p,k))*(pow(1-p,n-k))
     return Pofk
     
@@ -117,10 +126,13 @@ This function should take two arguments. The first is a list of arbitrarily
 labeled events and the second is a list of probabilities associated with these 
 events. Obviously, these two lists should be the same length.'''
 
+#Based on finding by Glaucia, the rv_discrete variable seemed appropriate for 
+#necessary calculation.
 from scipy.stats import rv_discrete
 
 
 def DiscreteSample(xk,pk,numbOfTrial): #Adding size because it allows more flexibility to function
+    #Line below apparently necessary in order for rv_discrete to work?    
     discrete = rv_discrete(name='discrete', values=(xk,pk)) 
     sample = discrete.rvs(size=numbOfTrial)
     x = []
@@ -131,6 +143,10 @@ numbOfTrial = 2
 arbevents = [5,6,7,8,9]
 prob = [0.3,0.1,0.2,0.2,0.2]
 y=DiscreteSample(arbevents,prob, numbOfTrial)
+#So, I add the line below, because it takes y array and extracts the first 
+#indexed list from that array (y[0]). I found that it was much easier to work with
+#a list than an array. For instance, I was unable to use the count method on an 
+#array, but was able to use it with a list.
 y = y[0]
 print y
 
@@ -171,16 +187,23 @@ z = DiscreteSample(SitesOrig,ListOfProb,numbOfTrial)
 z = z[0]
 print z
 """
-# Next attempt here seems to work--heavily based on Oscar's code
+# Next attempt here seems to work--heavily based on Oscar's code. numpy and 
+#tolist were useful in converting my array "NewAlignment" into a list. I could 
+#then count 1s and 2s in the lists.
 import numpy
+#Setting up two blank lists, and later I append lists into these lists. 
 list1 = []
 list2 = []
 
+#the num argument allows me to run the function as many times as I want. 
+#This is very useful later on.
 def MultipleSeqAlign(num):
     for x in range (0,num):
         SiteTypes = [1,2]
         Prob = [0.5,0.5]
         siz = 400
+        #the DiscreteSample function outputs an array which is hard to work with
+        #I could not figure out how to count 1s and 2s otherwise.        
         NewAlignment = DiscreteSample(SiteTypes,Prob, siz)
         NewAlignment = NewAlignment[0]
         NewAlignment = numpy.array(NewAlignment).tolist()
@@ -201,8 +224,8 @@ print("Number of type 2 sites: " + str(NewAlignment.count(2)))
 list1 = []
 list2 = []
 
-#howMany = input("how many times would you like to run the simulation? ")
-#NewValue = MultipleSeqAlign(howMany)
+#Here I tell the MultipleSeqAlign function to repeat the calculation in 
+#(6) 100 times.
 MultipleSeqAlign(100)
 
 print "List of number of type 1 sites in each of 100 repeats: ", list1
@@ -230,6 +253,10 @@ print("Number of type 2 sites when DiscreteSample function is run 100x: " + str(
 # 8.
 '''Of those 100 trials, summarize how often you saw particular proportions 
 of type 1 vs. type 2.'''
+#So here I show histograms of the distributions of the number of 1s and 2s 
+#counted in each of the 100 repeats (in separate histograms). This is not a
+#direct measure of the proportions though . . . It looks as if the proportions
+#however calculated should be very close to one.
 
 import matplotlib.pyplot as plt
 print("Histogram of type 1 distribution for 100 repeats") 
@@ -237,6 +264,8 @@ plt.hist(list1)
 print("Histogram of type 2 distribution for 100 repeats") 
 plt.hist(list2)
 
+#Below is a crack at measuring the proportion directly, but the 
+#output seemed really odd.
 '''
 #now to find proportion
 proportions = []
@@ -259,8 +288,14 @@ plt.ylabel("frequency")
 binomial probability mass function (PMF) from (4) (which calculates the 
 probability of k successes in n Bernoulli trials with probability p).'''
 
+#A handy storage location for the output of a forloop is an empty list.
+#This is something important I've learned from this assignment.
 BernoulliProb = []
 
+#The values in list1 are all the counts of the type one sites
+# or "successes." So I'm applying the BernTrial Probability Mass Function on 
+# each of the 100 type one sites or "success" values and storing the result in
+#list BernoulliProb.
 for val in list1:
     n=400
     p=0.5
@@ -300,6 +335,3 @@ for val in list1:
     BernoulliProb.append(BernTrial(n,p,k))
     
 print BernoulliProb
-    
-    
-    
