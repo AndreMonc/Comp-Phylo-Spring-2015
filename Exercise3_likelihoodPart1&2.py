@@ -243,6 +243,8 @@ If you understand recursion, you can use it to save some lines in this code, but
 not necessary to create a working function.
 """
 
+#worked quite a bit with Glaucia to understand and write the code below. Thanks Glaucia!!
+
 # Write a function that finds the ML value of p for a binomial, given k and n.
 #So this function "searches" for the p value with the maximum likelihood
 def MaxLikValofP(n,pCurr,k,diff):
