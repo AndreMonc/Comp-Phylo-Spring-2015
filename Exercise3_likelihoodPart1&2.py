@@ -400,7 +400,6 @@ print percentile(natlogval,95)
 # sets above?
 
 likeliRatios.pop(0)
-likeliRatios.pop(19)
 test1 = []
 #5 trials
 for rat in likeliRatios:
