@@ -244,30 +244,30 @@ not necessary to create a working function.
 """
 
 # Write a function that finds the ML value of p for a binomial, given k and n.
-
+#So this function "searches" for the p value with the maximum likelihood
 def MaxLikValofP(n,pCurr,k,diff):
-    pUp=pCurr+diff 
+    pUp=pCurr+diff
     pDown=pCurr-diff    
     Lik_pCurr = binomialPMF(n=n,p=pCurr,k=k)
     Lik_pUp = binomialPMF(n=n,p=pUp,k=k)
     Lik_pDown = binomialPMF(n=n,p=pDown,k=k)
     if (Lik_pCurr < Lik_pUp):
-        while (Lik_pCurr < Lik_pUp):
+        while (Lik_pCurr < Lik_pUp): #this while section essentially increases all values by a step when the "if" statement is not met
             pCurr = pUp
             Lik_pCurr = binomialPMF(n=n,p=pCurr,k=k)
             pUp = pCurr + diff
             Lik_pUp = binomialPMF(n=n,p=pUp,k=k)
-        return pCurr
+        return pCurr #I want to get back the p value
     else: 
-        while (Lik_pCurr < Lik_pDown):
+        while (Lik_pCurr < Lik_pDown): #this while section essentially decreases all values by a step when the "if" statement is not met
             pCurr = pDown
             Lik_pCurr = binomialPMF(n=n,p=pCurr,k=k)
             pDown = pCurr - diff
             Lik_pDown = binomialPMF(n=n,p=pDown,k=k)
-        return pCurr
+        return pCurr #I want to get back the p value
     
 
-maxLikVal = MaxLikValofP(5,0.5,4,0.1)
+maxLikVal = MaxLikValofP(5,0.5,4,0.1) #This seems to return the right value
 #print maxLikVal
 
 """
@@ -298,14 +298,14 @@ that the probability of seeing an LR score that big or greater is <= 5%.
 import matplotlib.pyplot as plt
 from scipy.stats import rv_discrete
 
-def randomDraw(xk,pk,numTrials):
+def randomDraw(xk,pk,numTrials): #This is the function that I used in the first exercise. Draws random numbers from a discrete distribution.
     discrete = rv_discrete(name='discrete', values=(xk, pk))
     simulation1 = discrete.rvs(size=numTrials)
     listResult = list(simulation1)
     return listResult
     
 simulation1000=[]
-for i in range(1000):  
+for i in range(1000): #this range includes 0 through 999  
     dataset1 = randomDraw(xk=[0,1],pk=[0.3,0.7],numTrials=200)
     numSuccess1 = dataset1.count(1)
     simulation1000.append(numSuccess1)
@@ -314,7 +314,7 @@ print simulation1000
     
 # Now find ML parameter estimates for each of these trials
 
-MLvalueP = []
+MLvalueP = [] 
 for succ in simulation1000:
     MLvalofP1 = MaxLikValofP(n=200,pCurr=0.01,k=succ,diff=0.001) #arguments for this function are (n,pCurr,k,diff)
     MLvalueP.append(MLvalofP1)
@@ -342,14 +342,15 @@ def MaxLikVal(n,pCurr,k,diff): #with this function I can get max lik values (not
             Lik_pCurr = binomialPMF(n=n,p=pCurr,k=k)
             pUp = pCurr + diff
             Lik_pUp = binomialPMF(n=n,p=pUp,k=k)
-        return Lik_pCurr
+        return Lik_pCurr #Lik_pCurr this time, rather than pCurr. Important difference!!
     else: 
         while (Lik_pCurr < Lik_pDown):
             pCurr = pDown
             Lik_pCurr = binomialPMF(n=n,p=pCurr,k=k)
             pDown = pCurr - diff
             Lik_pDown = binomialPMF(n=n,p=pDown,k=k)
-        return Lik_pCurr
+        return Lik_pCurr #Lik_pCurr this time, rather than pCurr. Important difference!!
+    else: 
 
 #MaxLikVal(n=3,pCurr=0.6,k=2,diff=0.01)
 
@@ -375,21 +376,47 @@ print natlogval
 
 # Find the 95th percentile of these values. Compare these values to this table:
 # https://people.richland.edu/james/lecture/m170/tbl-chi.html. In particular, look
-# at the 0.05 column. Do any of these values seem similar to the one you calculated?
-# Any idea why that particular cell would be meaningful?
+# at the 0.05 column. 
 
+#Do any of these values seem similar to the one you calculated?
 print percentile(natlogval,95)
 ###I get 3.58, which is not too far from 3.841 in the 1 df row.
+#Taking the 95th percentile allows one to identify the point at which all higher values will have a <5% chance of occuring.
 
+# Any idea why that particular cell would be meaningful? 
+#Andre:It represents the alpha level for the chi-square test (the measure of when
+#a chi-square test is significant or not at the 0.05 level). Since binomial
+#trials have 1 degree of freedom, this cell indicates the 0.05 alpha level for 
+#a binomial as well.
 
 # Based on your results (and the values in the table), what LR statistic value 
 # [-2ln(LR)] indicates that a null value of p is far enough away from the ML value
 # that an LR of that size is <=5% probable if that value of p was true?
-
-
+#Andre:I think any likelihood ration value greater than 3.58.
 
 # Using this cutoff, what interval might you report for the 5- and 20-trial data
 # sets above?
+
+likeliRatios.pop(0)
+likeliRatios.pop(19)
+test1 = []
+#5 trials
+for rat in likeliRatios:
+    conv = (-2)*(log(rat))
+    test1.append(conv)
+print test1
+    
+#So, I am not entirely sure how to figure out my final confidence interval . . .
+    
+likeliRatios2.pop(0)
+likeliRatios2.pop(19)   
+test2 = [] 
+#20 trials 
+for ratio in likeliRatios2:
+    conversion = (-2)*(log(ratio))
+    test2.append(conversion)
+print test2
+    
 
 
 
