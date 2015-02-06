@@ -8,47 +8,37 @@ from numpy import percentile
 """
 Created on Thu Jan 29 11:36:12 2015
 
-
-@author: Andre
+@author: Andre--with help at various points from Glaucia. Directions 
+from Jeremy interspersed with my own comments and code.
 """
 
-"""
-An Introduction to Likelihood
-@author: jembrown
-"""
-#Random draws. Provided by Jeremy--handy for drawing random outcomes.
-n = 5
-p = 0.5 # Change this and repeat
+'''
+binom.rvs function below provided by Jeremy--handy for drawing random outcomes
+from a binomial distribution. The arguments in the function below are (n,p).
+n refers to the number of trials (say, coin flips). p refers to the probability 
+of a "success" (say, heads). Thus, if n=100 and p=0.5, one would expect to have 
+around 50 heads or successes if flipping a fair coin. I messed around with the
+function, inputting various numbers, and it worked well.
+'''
 
-data = binom.rvs(5,0.01)
+data = binom.rvs(100,0.5)
 print data
 
-
-#Arbitrarily defined dark marbles as successes (k) and light marbles as failures. 
-
-#The number of successes is 4. So, n=5 (number of trials), k=4, p=unknown. I used 
-#these new data to find an interval that hopefully contains the true value of p.
-
-"""
-Record the outcomes here:
-Draw 1: 1
-Draw 2: 1
-Draw 3: 1
-Draw 4: 1
-Draw 5: 0
-Number of 'successes': 4
-Now record the observed number of succeses as in the data variable below.
-"""
+'''
+The class arbitrarily defined dark marbles as successes (k) and light marbles 
+as failures. Jeremy provided this data for below calculations: the number of 
+successes is 4. So, n=5 (number of trials), k=4, p=unknown. I use these new 
+data to find an interval that hopefully contains the true value of p.
+'''
 
 data = 4  #This 4 refers to the number of successes (dark marbles drawn)
-numTrials = 5
+numTrials = 5 #Number of draws (or could be coin flips in another scenario)
 
 
 """
-Since we are trying to learn about p, we define the likelihood function as;
-L(p;data) = P(data|p)
-If data is a binomially distributed random variable [data ~ Binom(5,p)]
-P(data=k|p) = (5 choose k) * p^k * (1-p)^(n-k)
+Jeremy: Since we are trying to learn about p, we define the likelihood function as;
+L(p;data) = P(data|p). If data is a binomially distributed random variable 
+[data ~ Binom(5,p)] P(data=k|p) = (5 choose k) * p^k * (1-p)^(n-k).
 So, we need a function to calculate the binomial PMF. Luckily, you should have 
 just written one and posted it to GitHub for your last exercise. Copy and paste 
 your binomial PMF code below. For now, I will refer to this function as 
@@ -57,8 +47,8 @@ binomPMF().
 
 #I cut and pasted my functions from the previous assignment below:
 
-#The two-part argument is inclusive for min but exclusive for max. I therefore 
-#make the product variable to equal max.
+#The two-part argument of SeriesMult is inclusive for min but exclusive for max. 
+#I therefore make the product variable to equal max.
 def SeriesMult(min,max): # SeriesMult stands for series multiplier. 
     product = max
     for integer in range(min,max,1):
@@ -83,27 +73,32 @@ def binomialPMF(n,p,k):
         Pofksuccesses = Binomcoeff*(pow(p,k))*(pow(1-p,n-k))
     return Pofksuccesses
       
-binomialPMF(3,0.5,2) #Just double-checking that the function works by using the 2 heads in three flips example (I know output should be 0.375)
+binomialPMF(3,0.5,2) #Just double-checking that the function works by using 
+#the 2 heads in three flips example (I know output should be 0.375)
 #output is 0.375, so binomialPMF appears to work.
 
 
 """
-Now we need to calculate likelihoods for a series of different values for p to 
+Jeremy: Now we need to calculate likelihoods for a series of different values for p to 
 compare likelihoods. There are an infinite number of possible values for p, so 
 let's confine ourselves to steps of 0.05 between 0 and 1.
 """
-
-# Here I set up a list with all relevant values of p
-#pValues holds a list that includes potential p values in increments of 0.05 in the range 0 to 1
-#It took me forever to realize that using a 0.5 as the step argument in the range function caused problems.
-#0.5 is a float . . .
-#Much easier to use integers as arguments in the range function and divide by 100!
+'''
+Here I set up a list with all relevant values of p. The pValues variable holds 
+a list that includes potential p values in increments of 0.05 in the range 0 
+to 1. It took me forever to realize that using a 0.5 as the step argument in 
+the range function caused problems. 0.5 is a float . . . Much easier to use 
+integers as arguments in the range function and divide by 100!
+'''
 pValues = [x/100 for x in range(0,101,5)]  
 print pValues
 
-# Here I first create an empty list to hold likelihood values associated with the p values
-# Using a for loop I calculate likelihoods for each output of the binomialPMF function (p values varying)
-# In the loop I append the outputs into my likelihood list
+'''
+Below I first create an empty list to hold likelihood values associated with 
+the p values I generated above. Using a "for loop" I calculate likelihoods for 
+each output of the binomialPMF function (p values varying). In the loop I 
+append the outputs into my likelihood list.
+'''
 likelihood = []
 
 for prob in pValues:
@@ -112,29 +107,44 @@ for prob in pValues:
 
 print likelihood
 
-# I thind find the maximum likelihood value of p (from the arbitrary set of ps I chose)
-maxlikeli = max(likelihood) #The output here was not as precise as when I printed likelihood values above . . .
-# However, I was able to manually figure out which p value corresponded to the maximum likelihood.
-# Below, I tried to use a dictionary to match likelihood values with p values, but I couldn't figure out how to automate
-# The selection of a likelihood key (partly because of the max(likelihood) rounding problem mentioned above)
+'''
+Now I want to find the maximum likelihood value of p (from the arbitrary set 
+of p I chose):
+'''
+maxlikeli = max(likelihood)
+print maxlikeli
+
+'''
+#The maxlikelihood value printed above was not as precise as the likelihood 
+values stored in the list "likelihood." The "max" function appears to round 
+the value. This caused difficulties for me in trying to automate the matching 
+of the maximum likelihood value with its corresponding p value. However, I was 
+able to manually figure out which p value corresponded to the maximum 
+likelihood. Below, I tried to use a dictionary to match likelihood values with
+p values, but I couldn't figure out how to automate the process. The selection 
+of a likelihood key was tricky (partly because of the max(likelihood) 
+rounding problem mentioned above).
+'''
+
 #dict = dict(zip(likelihood,pValues))
 #dict = dict(zip(likelihood,pValues))#pair likelihood values with p values
-print maxlikeli
+
 #print dict #Easier to spot corresponding p value
 print("Maximum likelihood value of p is: " + str(0.8))
 
-#It was really helpful to visualize what was going on. The figure helped me double-check that my results made sense.
+#It was really helpful to visualize what was going on. The figure helped me 
+#double-check that my results made sense.
 plt.figure()
 plt.plot(pValues,likelihood)
 plt.xlabel("Probability")
 plt.ylabel("Likelihood")
 plt.title("Maximum Likelihood Estimation")
-plt.show()
+#plt.show()
 
 '''
-# What is the strength of evidence against the most extreme values of p (0 and 1)?
-My answer: The evidence is very strong because the values of p values of 0 and 1 have
-corresponding likelihood values of 0. 
+Jeremy: What is the strength of evidence against the most extreme values of 
+p (0 and 1)? My answer: The evidence is very strong because the values of p 
+values of 0 and 1 have corresponding likelihood values of 0. 
 '''
 
 # Calculate the likelihood ratios comparing each value (in the numerator) to the max value (in the denominator)
@@ -400,6 +410,7 @@ print percentile(natlogval,95)
 # sets above?
 
 likeliRatios.pop(0)
+likeliRatios.pop(19)
 test1 = []
 #5 trials
 for rat in likeliRatios:
