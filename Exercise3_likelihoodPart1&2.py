@@ -131,6 +131,7 @@ rounding problem mentioned above).
 
 #print dict #Easier to spot corresponding p value
 print("Maximum likelihood value of p is: " + str(0.8))
+#MLV is 0.4096 and MLVofP is 0.8
 
 #It was really helpful to visualize what was going on. The figure helped me 
 #double-check that my results made sense.
@@ -143,15 +144,18 @@ plt.title("Maximum Likelihood Estimation")
 
 '''
 Jeremy: What is the strength of evidence against the most extreme values of 
-p (0 and 1)? My answer: The evidence is very strong because the values of p 
-values of 0 and 1 have corresponding likelihood values of 0. 
+p (0 and 1)? My answer: The evidence is very strong because the p values of 
+0 and 1 have corresponding likelihood values of 0. 
+
+Jeremy: Calculate the likelihood ratios comparing each value 
+(in the numerator) to the max value (in the denominator)
+
+Below I simply created an empty list to hold the likelihood ratios. Then I used 
+a "for loop" to divide all likehood values by the maximum likelihood value.
+Thus, lower likelihood ratios signify a less likely/relevant likelihood value 
+in the numerator.
 '''
 
-# Calculate the likelihood ratios comparing each value (in the numerator) to the max value (in the denominator)
-
-#Here I simply created an empty list to hold the likelihood ratios
-#Then I use a for loop to divide all likehood values by the maximum likelihood value.
-#Thus, lower likelihood ratios signify a less likely/relevant likelihood value in the numerator.
 likeliRatios = []
 for x in likelihood:
     ratio=x/0.4096
@@ -160,18 +164,25 @@ for x in likelihood:
 print likeliRatios
 
 """
-Now let's try this all again, but with more data. This time, we'll use 20 draws from our cup of marbles.
+Jeremy: Now let's try this all again, but with more data. This time, we'll 
+use 20 draws from our cup of marbles.
 """
 
-data = 12   # Supply observed number of successes here.
-numTrials = 20
+data = 12   #number of successes = k.
+numTrials = 20 #number of trials = n.
 
+'''
+Jeremy: Calculate the likelihood scores for values of p, in light of the 
+data you've collected.
 
-# Calculate the likelihood scores for values of p, in light of the data you've collected
-pValues2 = [x/100 for x in range(0,101,5)]  
+Below I simply generate a list of p values ranging from 0 to 1 in 
+increments of 0.05.
+'''
+pValues2 = [x/100 for x in range(0,101,5)
 print pValues2
 
-likelihood2 = []
+likelihood2 = [] #This is a list to store the likelihood values for each of 
+#the p values I generated above.
 
 for prob in pValues:
     singleLikelihood2 = binomialPMF(k=12,n=20,p=prob)
@@ -179,27 +190,39 @@ for prob in pValues:
 
 print likelihood2
 
-# Find the maximum likelihood value of p (at least, the max in this set)
+#Jeremy: Find the maximum likelihood value of p (at least, the max in this set)
+
 maxlikeli2 = max(likelihood2)
 print maxlikeli2
-#The maximum likelihood value is 0.1797... and it is associated with a p value of 0.6
-#dict2 = dict(zip(likelihood2,pValues2))
-#print dict2 #Easier to spot corresponding p value
-#print("Maximum likelihood value of p is: " + str(dict[]))
 
+'''
+The maximum likelihood value is 0.1797... and it is associated with a 
+p value of 0.6.
+
+Never quite got this to work:
+dict2 = dict(zip(likelihood2,pValues2))
+print dict2 #Easier to spot corresponding p value
+print("Maximum likelihood value of p is: " + str(dict[]))
+'''
 plt.figure()
 plt.plot(pValues2,likelihood2)
 plt.xlabel("Probability")
 plt.ylabel("Likelihood")
 plt.title("Maximum Likelihood Estimation")
-plt.show()
+#plt.show()
 
-# What is the strength of evidence against the most extreme values of p (0 and 1)?
-#My answer: The evidence is very strong because the values of p values of 0 and 1 have
-#corresponding likelihood values of 0. 
+'''
+Jeremy: What is the strength of evidence against the most extreme values of p 
+(0 and 1)?
 
-# Calculate the likelihood ratios comparing each value (in the numerator) to the max value (in the denominator)
+My answer: The evidence is very strong because the p values of 0 and 1 have 
+corresponding likelihood values of 0. 
+'''
 
+'''
+# Jeremy: Calculate the likelihood ratios comparing each value (in the 
+numerator) to the max value (in the denominator)
+'''
 likeliRatios2 = []
 for x in likelihood2:
     ratio2 = x/0.17970578775468937
@@ -207,10 +230,12 @@ for x in likelihood2:
     
 print likeliRatios2
 
-# When is the ratio small enough to reject some values of p?
-#Is it <0.05? Or am I conflating this number with alpha values?
-# Note: You will empirically investigate this on your own later in this exercise.
-
+'''
+Jeremy: When is the ratio small enough to reject some values of p?
+My answer: Is it when the ratio falls in the outer 5% of the distribution
+of likelihood values (with the maximum likelihood as the center)? 
+Note: You will empirically investigate this on your own later in this exercise.
+'''
 
 
 # **** EVERYTHING ABOVE HERE TO BE POSTED TO GITHUB BY TUESDAY, FEB. 3RD. ****
