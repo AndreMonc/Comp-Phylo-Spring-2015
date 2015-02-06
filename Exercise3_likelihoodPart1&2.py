@@ -133,14 +133,16 @@ rounding problem mentioned above).
 print("Maximum likelihood value of p is: " + str(0.8))
 #MLV is 0.4096 and MLVofP is 0.8
 
-#It was really helpful to visualize what was going on. The figure helped me 
-#double-check that my results made sense.
+'''
+It was really helpful to visualize what was going on. The figure helped me 
+double-check that my results made sense.
 plt.figure()
 plt.plot(pValues,likelihood)
 plt.xlabel("Probability")
 plt.ylabel("Likelihood")
 plt.title("Maximum Likelihood Estimation")
-#plt.show()
+plt.show()
+'''
 
 '''
 Jeremy: What is the strength of evidence against the most extreme values of 
@@ -178,7 +180,8 @@ data you've collected.
 Below I simply generate a list of p values ranging from 0 to 1 in 
 increments of 0.05.
 '''
-pValues2 = [x/100 for x in range(0,101,5)
+
+pValues2 = [x/100 for x in range(0,101,5)]
 print pValues2
 
 likelihood2 = [] #This is a list to store the likelihood values for each of 
@@ -368,17 +371,24 @@ for i in range(1000):
 print simulation1000    
 
     
-# Now find ML parameter estimates for each of these trials
+'''
+Jeremy: Now find ML parameter estimates for each of these trials
+
+Below I find the p value that corresponds to the maximum likelihood value
+for each of the 1000 simulations I ran above.
+'''
 
 MLvalueP = [] 
 for succ in simulation1000:
-    MLvalofP1 = MaxLikValofP(n=200,pCurr=0.01,k=succ,diff=0.001) #arguments for this function are (n,pCurr,k,diff)
+    MLvalofP1 = MaxLikValofP(n=200,pCurr=0.01,k=succ,diff=0.001) 
     MLvalueP.append(MLvalofP1)
-print MLvalueP
+#print MLvalueP
 
-# Calculate likelihood ratios comparing L(trueP) in the numerator to the maximum
-# likelihood (ML) in the denominator. Sort the results and find the value
-# corresponding to the 95th percentile.
+'''
+Jeremy: Calculate likelihood ratios comparing L(trueP) in the numerator to the 
+maximum likelihood (ML) in the denominator. Sort the results and find the 
+value corresponding to the 95th percentile.
+'''
 
 LtrueP = []
 for ksucc in simulation1000:
@@ -386,7 +396,12 @@ for ksucc in simulation1000:
     LtrueP.append(LwithTrueP)
 print(LtrueP)
 
-def MaxLikVal(n,pCurr,k,diff): #with this function I can get max lik values (note that output is vpCurr rather than pCurr, as in the similar function above)
+'''
+With the function defined below I can get maximum likelihood values (note 
+that output is Lik_Curr rather than pCurr, as in the similar function above)
+'''
+
+def MaxLikVal(n,pCurr,k,diff): 
     pUp=pCurr+diff 
     pDown=pCurr-diff    
     Lik_pCurr = binomialPMF(n=n,p=pCurr,k=k)
@@ -406,15 +421,16 @@ def MaxLikVal(n,pCurr,k,diff): #with this function I can get max lik values (not
             pDown = pCurr - diff
             Lik_pDown = binomialPMF(n=n,p=pDown,k=k)
         return Lik_pCurr #Lik_pCurr this time, rather than pCurr. Important difference!!
-    else: 
+    
 
 #MaxLikVal(n=3,pCurr=0.6,k=2,diff=0.01)
 
+#Using the function defined above to find ML values
 MLV = []
 for ksucc in simulation1000:
     maxLV = MaxLikVal(n=200,pCurr=0.01,k=ksucc,diff=0.01)
     MLV.append(maxLV)
-print MLV
+#print MLV
 
 LikeRatios = [float(ltp)/float(mlv) for ltp,mlv in zip(LtrueP,MLV)]
 print LikeRatios
@@ -422,7 +438,7 @@ print LikeRatios
 #Here I calculate the 95th percentile of my likelihood ratios
 print percentile(LikeRatios,95)
    
-# Now, convert the likelihood ratios (LRs) to -2ln(LRs) values.
+#Now, I convert the likelihood ratios (LRs) to -2ln(LRs) values.
 from math import log
 natlogval = []
 for LR in LikeRatios:
@@ -430,28 +446,43 @@ for LR in LikeRatios:
     natlogval.append(logval)
 print natlogval
 
-# Find the 95th percentile of these values. Compare these values to this table:
-# https://people.richland.edu/james/lecture/m170/tbl-chi.html. In particular, look
-# at the 0.05 column. 
+'''
+Jeremy: Find the 95th percentile of these values. Compare these values to this table:
+https://people.richland.edu/james/lecture/m170/tbl-chi.html. In particular, look
+at the 0.05 column. 
+Do any of these values seem similar to the one you calculated?
+'''
 
-#Do any of these values seem similar to the one you calculated?
 print percentile(natlogval,95)
-###I get 3.58, which is not too far from 3.841 in the 1 df row.
-#Taking the 95th percentile allows one to identify the point at which all higher values will have a <5% chance of occuring.
 
-# Any idea why that particular cell would be meaningful? 
-#Andre:It represents the alpha level for the chi-square test (the measure of when
-#a chi-square test is significant or not at the 0.05 level). Since binomial
-#trials have 1 degree of freedom, this cell indicates the 0.05 alpha level for 
-#a binomial as well.
+list1 = [1,2,3,4,5,6,7,8,9,10]
+print percentile(list1, 5)
 
-# Based on your results (and the values in the table), what LR statistic value 
-# [-2ln(LR)] indicates that a null value of p is far enough away from the ML value
-# that an LR of that size is <=5% probable if that value of p was true?
-#Andre:I think any likelihood ration value greater than 3.58.
+'''
+I get 3.58, which is not too far from 3.841 in the 1 df row and 0.05 column.
+Taking the 95th percentile allows one to identify the point at which all 
+higher values will have a <5% chance of occuring.
+
+Jeremy: Any idea why that particular cell would be meaningful? 
+
+It represents the alpha level for the chi-square test (the measure of when
+a chi-square test is significant or not at the 0.05 level). Since binomial
+trials have 1 degree of freedom, this cell indicates the 0.05 alpha level for 
+a binomial as well. I think . . .
+
+Jeremy: Based on your results (and the values in the table), what LR statistic 
+value [-2ln(LR)] indicates that a null value of p is far enough away from the 
+ML value that an LR of that size is <=5% probable if that value of p was true?
+
+I think any natural log likelihood ratio value greater than 3.58. It is 
+important to note that there is an inverse relationship between the -2ln(LR)
+and the LR. This is why it makes sense to remove the top 5% of the values. 
+(They are the furthest values from the maximum likelihood, if I am interpreting
+the analysis correctly).
 
 # Using this cutoff, what interval might you report for the 5- and 20-trial data
 # sets above?
+'''
 
 likeliRatios.pop(0)
 likeliRatios.pop(19)
