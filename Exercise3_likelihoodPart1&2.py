@@ -232,8 +232,9 @@ print likeliRatios2
 
 '''
 Jeremy: When is the ratio small enough to reject some values of p?
-My answer: Is it when the ratio falls in the outer 5% of the distribution
-of likelihood values (with the maximum likelihood as the center)? 
+My answer: Is it when the ratio falls in the lower 5% of the distribution
+of likelihood ratio values (with the maximum likelihood ratio (1) at the 
+opposite end of the the distribution)? 
 Note: You will empirically investigate this on your own later in this exercise.
 '''
 
@@ -243,45 +244,50 @@ Note: You will empirically investigate this on your own later in this exercise.
 
 
 """
-Sometimes it will not be feasible or efficient to calculate the likelihoods for every
-value of a parameter in which we're interested. Also, that approach can lead to large
-gaps between relevant values of the parameter. Instead, we'd like to have a 'hill
-climbing' function that starts with some arbitrary value of the parameter and finds
-values with progressively better likelihood scores. This is an ML optimization
-function. There has been a lot of work on the best way to do this. We're going to try
-a fairly simple approach that should still work pretty well, as long as our likelihood 
-surface is unimodal (has just one peak). Our algorithm will be:
-(1) Calculate the likelihood for our starting parameter value (we'll call this pCurr)
-(2) Calculate likelihoods for the two parameter values above (pUp) and below (pDown)
-our current value by some amount (diff). So, pUp=pCurr+diff and pDown=pCurr-diff. To
-start, set diff=0.1, although it would be nice to allow this initial value to be set
-as an argument of our optimization function.
-(3) If either pUp or pDown has a better likelihood than pCurr, change pCurr to this
-value. Then repeat (1)-(3) until pCurr has a higher likelihood than both pUp and
-pDown.
-(4) Once L(pCurr) > L(pUp) and L(pCurr) > L(pDown), reduce diff by 1/2. Then repeat
-(1)-(3).
-(5) Repeat (1)-(4) until diff is less than some threshold (say, 0.001).
-(6) Return the final optimized parameter value.
-Write a function that takes some starting p value and observed data (k,n) for a
-binomial as its arguments and returns the ML value for p.
-To write this function, you will probably want to use while loops. The structure of
-these loops is
-while (someCondition):
+Jeremy: Sometimes it will not be feasible or efficient to calculate the 
+likelihoods for every value of a parameter in which we're interested. Also, 
+that approach can lead to large gaps between relevant values of the parameter. 
+Instead, we'd like to have a 'hill climbing' function that starts with some 
+arbitrary value of the parameter and finds values with progressively better 
+likelihood scores. This is an ML optimization function. There has been a lot 
+of work on the best way to do this. We're going to try a fairly simple approach
+that should still work pretty well, as long as our likelihood surface is 
+unimodal (has just one peak). Our algorithm will be: (1) Calculate the 
+likelihood for our starting parameter value (we'll call this pCurr) (2) 
+Calculate likelihoods for the two parameter values above (pUp) and below 
+(pDown) our current value by some amount (diff). So, pUp=pCurr+diff and 
+pDown=pCurr-diff. To start, set diff=0.1, although it would be nice to allow 
+this initial value to be set as an argument of our optimization function.
+(3) If either pUp or pDown has a better likelihood than pCurr, change pCurr 
+to this value. Then repeat (1)-(3) until pCurr has a higher likelihood than 
+both pUp and pDown. (4) Once L(pCurr) > L(pUp) and L(pCurr) > L(pDown), reduce
+diff by 1/2. Then repeat (1)-(3). (5) Repeat (1)-(4) until diff is less than 
+some threshold (say, 0.001). (6) Return the final optimized parameter value.
+Write a function that takes some starting p value and observed data (k,n) for 
+a binomial as its arguments and returns the ML value for p. To write this 
+function, you will probably want to use while loops. The structure of
+these loops is while (someCondition):
     code line 1 inside loop
     code line 2 inside loop
-    
 As long as the condition remains True, the loop will continue executing. If the
-condition isn't met (someCondition=False) when the loop is first encountered, the 
-code inside will never execute.
-If you understand recursion, you can use it to save some lines in this code, but it's
-not necessary to create a working function.
+condition isn't met (someCondition=False) when the loop is first encountered, 
+the code inside will never execute. If you understand recursion, you can use it 
+to save some lines in this code, but it's not necessary to create a working 
+function.
 """
 
-#worked quite a bit with Glaucia to understand and write the code below. Thanks Glaucia!!
+'''
+I worked quite a bit with Glaucia to understand and write the code below. 
+Thanks Glaucia!! In class we realized that this function would be quite a 
+bit faster if we could first run it with a large diff and then automate the
+switch to a smaller diff once the function was nearer to finding the max
+likelihood of p.
 
-# Write a function that finds the ML value of p for a binomial, given k and n.
-#So this function "searches" for the p value with the maximum likelihood
+Jeremy: Write a function that finds the ML value of p for a binomial, given 
+k and n. #So this function "searches" for the p value with the maximum 
+likelihood.
+'''
+
 def MaxLikValofP(n,pCurr,k,diff):
     pUp=pCurr+diff
     pDown=pCurr-diff    
@@ -289,15 +295,15 @@ def MaxLikValofP(n,pCurr,k,diff):
     Lik_pUp = binomialPMF(n=n,p=pUp,k=k)
     Lik_pDown = binomialPMF(n=n,p=pDown,k=k)
     if (Lik_pCurr < Lik_pUp):
-        while (Lik_pCurr < Lik_pUp): #this while section essentially increases all values by a step when the "if" statement is not met
-            pCurr = pUp
+        while (Lik_pCurr < Lik_pUp): #this "while" section increases each
+            pCurr = pUp #value by step diff each time the "if" statement is met
             Lik_pCurr = binomialPMF(n=n,p=pCurr,k=k)
             pUp = pCurr + diff
             Lik_pUp = binomialPMF(n=n,p=pUp,k=k)
         return pCurr #I want to get back the p value
     else: 
-        while (Lik_pCurr < Lik_pDown): #this while section essentially decreases all values by a step when the "if" statement is not met
-            pCurr = pDown
+        while (Lik_pCurr < Lik_pDown): #this "while" section decreases each
+            pCurr = pDown #value by step diff each time the "if" statement is met
             Lik_pCurr = binomialPMF(n=n,p=pCurr,k=k)
             pDown = pCurr - diff
             Lik_pDown = binomialPMF(n=n,p=pDown,k=k)
@@ -320,7 +326,7 @@ likelihood ratios that might be expected if the value of p you picked in (1)
 was true. Note that the ML values for these replicates are very often greater than
 L(true value of P), because the ML value can only ever be >= L(true value). Once 
 you have this distribution, find the likelihood ratio cutoff you need to ensure 
-that the probability of seeing an LR score that big or greater is <= 5%. 
+that the probability of seeing a LR score that big or greater is <= 5%. 
 """
 
 # Set a starting, true value for p
@@ -335,14 +341,27 @@ that the probability of seeing an LR score that big or greater is <= 5%.
 import matplotlib.pyplot as plt
 from scipy.stats import rv_discrete
 
-def randomDraw(xk,pk,numTrials): #This is the function that I used in the first exercise. Draws random numbers from a discrete distribution.
+'''
+The function below is one that I used in the first exercise. It draws random 
+numbers from a discrete binomial distribution.
+'''
+def randomDraw(xk,pk,numTrials): 
     discrete = rv_discrete(name='discrete', values=(xk, pk))
     simulation1 = discrete.rvs(size=numTrials)
     listResult = list(simulation1)
     return listResult
     
+'''
+The range in the "for loop" below includes 0 through 999 (thereby generating 
+1000 simulations). I've set up the simulations such that there are two possible
+outcomes or outputs (0 or 1). The convention I follow is that an output of "1" 
+means a success. The probability of a success in any given trial is is 0.7. One
+simulation essentially involves flipping a coin weighted in favor of heads
+200 times and counting the number of heads. I store this number in a list
+(simulation1000) and then repeat 999 more times.
+'''
 simulation1000=[]
-for i in range(1000): #this range includes 0 through 999  
+for i in range(1000): 
     dataset1 = randomDraw(xk=[0,1],pk=[0.3,0.7],numTrials=200)
     numSuccess1 = dataset1.count(1)
     simulation1000.append(numSuccess1)
