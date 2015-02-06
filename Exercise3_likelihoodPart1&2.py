@@ -93,6 +93,9 @@ integers as arguments in the range function and divide by 100!
 pValues = [x/100 for x in range(0,101,5)]  
 print pValues
 
+numPval = len(pValues)
+print numPval
+
 '''
 Below I first create an empty list to hold likelihood values associated with 
 the p values I generated above. Using a "for loop" I calculate likelihoods for 
@@ -105,14 +108,14 @@ for prob in pValues:
     singleLikelihood = binomialPMF(k=4,n=5,p=prob)
     likelihood.append(singleLikelihood)
 
-print likelihood
+#print likelihood
 
 '''
 Now I want to find the maximum likelihood value of p (from the arbitrary set 
 of p I chose):
 '''
 maxlikeli = max(likelihood)
-print maxlikeli
+#print maxlikeli
 
 '''
 #The maxlikelihood value printed above was not as precise as the likelihood 
@@ -368,7 +371,7 @@ for i in range(1000):
     dataset1 = randomDraw(xk=[0,1],pk=[0.3,0.7],numTrials=200)
     numSuccess1 = dataset1.count(1)
     simulation1000.append(numSuccess1)
-print simulation1000    
+#print simulation1000    
 
     
 '''
@@ -394,7 +397,7 @@ LtrueP = []
 for ksucc in simulation1000:
     LwithTrueP = binomialPMF(n=200,k=ksucc,p=0.7)
     LtrueP.append(LwithTrueP)
-print(LtrueP)
+#print(LtrueP)
 
 '''
 With the function defined below I can get maximum likelihood values (note 
@@ -433,7 +436,7 @@ for ksucc in simulation1000:
 #print MLV
 
 LikeRatios = [float(ltp)/float(mlv) for ltp,mlv in zip(LtrueP,MLV)]
-print LikeRatios
+#print LikeRatios
 
 #Here I calculate the 95th percentile of my likelihood ratios
 print percentile(LikeRatios,95)
@@ -444,7 +447,7 @@ natlogval = []
 for LR in LikeRatios:
     logval = (-2)*(log(LR))
     natlogval.append(logval)
-print natlogval
+#print natlogval
 
 '''
 Jeremy: Find the 95th percentile of these values. Compare these values to this table:
@@ -456,7 +459,7 @@ Do any of these values seem similar to the one you calculated?
 print percentile(natlogval,95)
 
 list1 = [1,2,3,4,5,6,7,8,9,10]
-print percentile(list1, 5)
+#print percentile(list1, 5)
 
 '''
 I get 3.58, which is not too far from 3.841 in the 1 df row and 0.05 column.
@@ -484,28 +487,36 @@ the analysis correctly).
 # sets above?
 '''
 
-likeliRatios.pop(0)
-likeliRatios.pop(19)
+#The highest and lowest values of the ratio list apparently screw up with the
+#ln function? 21 LR values correspond to 21 p values that range from 0 through 1 
+#with 0.05 increments. For some reason, the code doesn't seem to let me pop
+#21 (position 20). It says out of range??? Also, I am only getting 18 outputs 
+#for my test1 print!!! What is going on?
+#5 trial data set
+
+
+print likeliRatios
+print likeliRatios2
 test1 = []
-#5 trials
+
 for rat in likeliRatios:
     conv = (-2)*(log(rat))
     test1.append(conv)
 print test1
-    
-#So, I am not entirely sure how to figure out my final confidence interval . . .
-    
-likeliRatios2.pop(0)
-likeliRatios2.pop(19)   
+
+#Looking over the ratio outputs I think I can eliminate ~ p = 0 through p = 0.25. 
+#Also, I can eliminate p = 1. Roughly CI of 0.3 to 0.95. (I am eliminating LR
+# >3.85 and = 0.)
+      
 test2 = [] 
 #20 trials 
 for ratio in likeliRatios2:
     conversion = (-2)*(log(ratio))
     test2.append(conversion)
 print test2
-    
 
-
+#For some reason I'm not able to get any output from test2. Math domain error.
 
 # We've talked in previous classes about two ways to interpret probabilities. Which
 # interpretation are we using here to define these intervals?
+#Frequentist approach! Collecting masses of data and deriving results thereof.
