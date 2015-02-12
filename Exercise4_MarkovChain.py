@@ -1,3 +1,4 @@
+from __future__ import division
 # -*- coding: utf-8 -*-
 """
 Created on Tue Feb 10 09:43:43 2015
@@ -49,15 +50,14 @@ moderate (between 0.2 and 0.8).
 """
 
 # Define a transition probability matrix for the chain with states A and B
-
-
+probmat = [[0.7,0.3],[0.6,0.4]]
 
 # Try accessing a individual element or an individual row 
 # Element
-
+probmat[1][0] #This will access the position 1 list and position 0 element
 
 # Row
-
+probmat[1] #This will access the entire position 1 list
 
 """
 Now, write a function that simulates the behavior of this chain over n time
@@ -66,20 +66,67 @@ values from a discrete distribution. You'll need to be able to draw a random
 number between 0 and 1 (built in to scipy), then use your discrete sampling 
 function to draw one of your states based on this random number.
 """
-
 # Import scipy U(0,1) random number generator
 
-
+from scipy.stats import rv_discrete
 
 # Paste or import your discrete sampling function
 
+def DiscreteSample(xk,pk,numbOfTrial): #Adding size because it allows more 
+    #flexibility to this function
+    #Line below apparently necessary in order for rv_discrete to work?    
+    discrete = rv_discrete(name='discrete', values=(xk,pk)) 
+    sample = discrete.rvs(size=numbOfTrial)
+    x = []
+    x.append(sample)
+    y = x[0]
+    return y
 
+numbOfTrial = 1
+arbEvents = [5,6,7,8,9]
+prob = [0.3,0.1,0.2,0.2,0.2]
+y=DiscreteSample(arbEvents,prob,numbOfTrial)
+#So, I add the line below, because it takes y array and extracts the first 
+#indexed list from that array (y[0]). I found that it was much easier to work with
+#a list than an array. For instance, I was unable to use the count method on an 
+#array, but was able to use it with a list.
+print y
 
 # Write your Markov chain simulator below. Record the states of your chain in 
-# a list. Draw a random state to initiate the chain.
+# a list. 
+
+#I modeled this code after Jeremy's. Extremenly helpful to study that code in 
+#order to better understand how Markov chains work.
+
+def MarkovChSim(n,state=["A","B"],allProbs=[[0.5,0.5],[0.5,0.5]]):
+    """
+    This is a Markov chain simulation function with discrete time and states.
+    The first argument (n) defines the number of steps in the simulation (and 
+    thus equals the length of the list output). The second argument defines the 
+    state space (in this case only two alternatives), and the third argument 
+    defines the transition matrix.
+    """
+    
+    chainStates = []
+
+#Draw a random state to initiate the chain.
+    state=["A","B"]
+    prob=[0.5,0.5]
+    numbOfTrial=1 #I only want one output to initiate the chain
+    currState=DiscreteSample(state,prob,numbOfTrial)
+    chainStates.extend(currState)
+    #Now I want to simulate the chain states for the interval n-1 (everything
+    #after the initial state)
+    for step in range(1,n):
+        probability = allProbs[state.index(currState)] # Here I get a whole row
+        #from the allProbs array associated with the current state
+        currState = DiscreteSample(state,probability,1)
+        chainStates.extend(currState)
+    return chainStates
 
 
-
+#I still haven't gotten the above code to work smoothly...this week has been a bit hectic. I'll be focusing bigtime on 
+#Python over the weekend!!
 
 # Run a simulation of 10 steps and print the output.
 
