@@ -79,18 +79,14 @@ def DiscreteSample(xk,pk,numbOfTrial): #Adding size because it allows more
     sample = discrete.rvs(size=numbOfTrial)
     x = []
     x.append(sample)
-    y = x[0]
+    y = x[0]    
     return y
 
 numbOfTrial = 1
-arbEvents = [5,6,7,8,9]
-prob = [0.3,0.1,0.2,0.2,0.2]
-y=DiscreteSample(arbEvents,prob,numbOfTrial)
-#So, I add the line below, because it takes y array and extracts the first 
-#indexed list from that array (y[0]). I found that it was much easier to work with
-#a list than an array. For instance, I was unable to use the count method on an 
-#array, but was able to use it with a list.
-print y
+arbEvents = [1,2]
+prob = [0.9,0.1]
+test=DiscreteSample(arbEvents,prob,numbOfTrial)
+print test
 
 # Write your Markov chain simulator below. Record the states of your chain in 
 # a list. 
@@ -98,7 +94,7 @@ print y
 #I modeled this code after Jeremy's. Extremenly helpful to study that code in 
 #order to better understand how Markov chains work.
 
-def MarkovChSim(n,state=["A","B"],allProbs=[[0.5,0.5],[0.5,0.5]]):
+def MarkovChSim(n,state=[1,2],allProbs=[[0.5,0.5],[0.5,0.5]]):
     """
     This is a Markov chain simulation function with discrete time and states.
     The first argument (n) defines the number of steps in the simulation (and 
@@ -109,11 +105,11 @@ def MarkovChSim(n,state=["A","B"],allProbs=[[0.5,0.5],[0.5,0.5]]):
     
     chainStates = []
 
-#Draw a random state to initiate the chain.
-    state=["A","B"]
+    #Draw a random state to initiate the chain.
+    event=[1,2]
     prob=[0.5,0.5]
     numbOfTrial=1 #I only want one output to initiate the chain
-    currState=DiscreteSample(state,prob,numbOfTrial)
+    currState=DiscreteSample(event,prob,numbOfTrial)
     chainStates.extend(currState)
     #Now I want to simulate the chain states for the interval n-1 (everything
     #after the initial state)
@@ -121,16 +117,24 @@ def MarkovChSim(n,state=["A","B"],allProbs=[[0.5,0.5],[0.5,0.5]]):
         probability = allProbs[state.index(currState)] # Here I get a whole row
         #from the allProbs array associated with the current state
         currState = DiscreteSample(state,probability,1)
-        chainStates.extend(currState)
+        chainStates.extend(currState) 
     return chainStates
 
 
-#I still haven't gotten the above code to work smoothly...this week has been a bit hectic. I'll be focusing bigtime on 
-#Python over the weekend!!
-
 # Run a simulation of 10 steps and print the output.
 
+Markovsim10 = MarkovChSim(n=10,state=[1,2],allProbs=[[0.5,0.5],[0.5,0.5]])
+'''
+for state in range(len(Markovsim10)):
+    if Markovsim10[state] == "1":
+        replace("1","A")            
+    elif Markovsim10[state] == "2": 
+        replace("2","B") 
+'''
 
+
+print Markovsim10
+    
 
 # ----> Try to finish the above lines before Tues, Feb. 10th <----
 
