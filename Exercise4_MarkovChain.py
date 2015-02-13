@@ -123,17 +123,8 @@ def MarkovChSim(n,state=[1,2],allProbs=[[0.5,0.5],[0.5,0.5]]):
 
 # Run a simulation of 10 steps and print the output.
 
-Markovsim10 = MarkovChSim(n=10,state=[1,2],allProbs=[[0.5,0.5],[0.5,0.5]])
-'''
-for state in range(len(Markovsim10)):
-    if Markovsim10[state] == "1":
-        replace("1","A")            
-    elif Markovsim10[state] == "2": 
-        replace("2","B") 
-'''
-
-
-print Markovsim10
+Markov10step = MarkovChSim(n=10,state=[1,2],allProbs=[[0.5,0.5],[0.5,0.5]])
+print Markov10step
     
 
 # ----> Try to finish the above lines before Tues, Feb. 10th <----
@@ -141,11 +132,36 @@ print Markovsim10
 # Now try running 100 simulations of 100 steps each. How often does the chain
 # end in each state? How does this change as you change the transition matrix?
 
+sim100 = []
+for step in range(100):
+    Markov100step = MarkovChSim(n=100,state=[1,2],allProbs=[[0.5,0.5],[0.5,0.5]])
+    endState =  Markov100step[99]   
+    sim100.append(endState)
+print sim100
+
+sim100.count(1)
+sim100.count(2)
+
+#Now I'm gonna change the transition matrix so that state 1 is favored
+
+sim100Fav1 = []
+for step in range(100):
+    Markov100step = MarkovChSim(n=100,state=[1,2],allProbs=[[0.8,0.2],[0.8,0.2]])
+    endState =  Markov100step[99]   
+    sim100Fav1.append(endState)
+print sim100Fav1
+
+sim100Fav1.count(1)
+sim100Fav1.count(2)
+
+
+# Try defining a state space for nucleotides: A, C, G, and T. 
 
 
 
-# Try defining a state space for nucleotides: A, C, G, and T. Now define a 
-# transition matrix with equal probabilities of change between states.
+
+#Now define a transition matrix with equal probabilities of change between 
+#states.
 
 
 
