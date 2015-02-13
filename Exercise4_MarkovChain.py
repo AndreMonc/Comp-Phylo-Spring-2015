@@ -156,15 +156,65 @@ sim100Fav1.count(2)
 
 
 # Try defining a state space for nucleotides: A, C, G, and T. 
-
-
-
+NucStateSpace = ("A","C","G","T")
 
 #Now define a transition matrix with equal probabilities of change between 
 #states.
 
 
-
-         
+NucTransMat = [[0.25,0.25,0.25,0.25],[0.25,0.25,0.25,0.25],[0.25,0.25,0.25,0.25],[0.25,0.25,0.25,0.25]]
+     
 # Again, run 100 simulations of 100 steps and look at the ending states. Then
 # try changing the transition matrix.
+
+'''
+I've been having a lot of trouble using letter labels in my state space. Thus,
+I will make the following assignments: A=1,C=2,G=3,T=4.
+'''
+
+sim100Nucleo = []
+for step in range(100):
+    Markov100step = MarkovChSim(n=100,state=[1,2,3,4],allProbs=NucTransMat)
+    endState =  Markov100step[99]   
+    sim100Nucleo.append(endState)
+print sim100Nucleo
+
+sim100Nucleo.count(1)
+sim100Nucleo.count(2)
+sim100Nucleo.count(3)
+sim100Nucleo.count(4)
+
+
+#In order to see a really clear increase in endstates with "G" (or 4), I had
+#increase the row 1 probability of T given A by a lot!
+NucTransMatFavT = [[0.04,0.03,0.03,0.9],[0.25,0.25,0.25,0.25],[0.25,0.25,0.25,0.25],[0.25,0.25,0.25,0.25]]
+
+sim100NucleoFavT = []
+for step in range(100):
+    Markov100step = MarkovChSim(n=100,state=[1,2,3,4],allProbs=NucTransMatFavT)
+    endState =  Markov100step[99]   
+    sim100NucleoFavT.append(endState)
+print sim100NucleoFavT
+
+sim100NucleoFavT.count(1)
+sim100NucleoFavT.count(2)
+sim100NucleoFavT.count(3)
+sim100NucleoFavT.count(4)
+
+#Here I increase the probability of T given any previous nucleotide.
+#The number of T endstates is a little smaller here than for the above scenario
+#Though note that that T is not favored nearly as much in any given row
+NucTransMatFavTall = [[0.1,0.2,0.3,0.4],[0.1,0.2,0.3,0.4],[0.1,0.2,0.3,0.4],[0.1,0.2,0.3,0.4]]
+
+sim100NucleoFavTany = []
+for step in range(100):
+    Markov100step = MarkovChSim(n=100,state=[1,2,3,4],allProbs=NucTransMatFavT)
+    endState =  Markov100step[99]   
+    sim100NucleoFavTany.append(endState)
+print sim100NucleoFavTany
+
+sim100NucleoFavTany.count(1)
+sim100NucleoFavTany.count(2)
+sim100NucleoFavTany.count(3)
+sim100NucleoFavTany.count(4)
+   
