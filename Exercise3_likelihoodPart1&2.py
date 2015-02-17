@@ -73,7 +73,14 @@ def binomialPMF(n,p,k):
         Pofksuccesses = Binomcoeff*(pow(p,k))*(pow(1-p,n-k))
     return Pofksuccesses
       
-binomialPMF(3,0.5,2) #Just double-checking that the function works by using 
+test = binomialPMF(7,0.5,5)
+print test
+
+test = binomialPMF(3,0.6666,2)
+print test
+
+
+ #Just double-checking that the function works by using 
 #the 2 heads in three flips example (I know output should be 0.375)
 #output is 0.375, so binomialPMF appears to work.
 
@@ -294,30 +301,30 @@ k and n. #So this function "searches" for the p value with the maximum
 likelihood.
 '''
 
-def MaxLikValofP(n,pCurr,k,diff):
-    pUp=pCurr+diff
-    pDown=pCurr-diff    
-    Lik_pCurr = binomialPMF(n=n,p=pCurr,k=k)
-    Lik_pUp = binomialPMF(n=n,p=pUp,k=k)
-    Lik_pDown = binomialPMF(n=n,p=pDown,k=k)
-    if (Lik_pCurr < Lik_pUp):
-        while (Lik_pCurr < Lik_pUp): #this "while" section increases each
-            pCurr = pUp #value by step diff each time the "if" statement is met
-            Lik_pCurr = binomialPMF(n=n,p=pCurr,k=k)
-            pUp = pCurr + diff
-            Lik_pUp = binomialPMF(n=n,p=pUp,k=k)
-        return pCurr #I want to get back the p value
-    else: 
-        while (Lik_pCurr < Lik_pDown): #this "while" section decreases each
-            pCurr = pDown #value by step diff each time the "if" statement is met
-            Lik_pCurr = binomialPMF(n=n,p=pCurr,k=k)
-            pDown = pCurr - diff
-            Lik_pDown = binomialPMF(n=n,p=pDown,k=k)
-        return pCurr #I want to get back the p value
-    
+def MaxLikValofP(n,k,pCurr,diff): 
+    while diff > 0.0001:
+        pUp=pCurr+diff
+        pDown=pCurr-diff    
+        Lik_pCurr = binomialPMF(n,pCurr,k)
+        Lik_pUp = binomialPMF(n,pUp,k)
+        Lik_pDown = binomialPMF(n,pDown,k)             
+        while Lik_pCurr < Lik_pUp or Lik_pCurr < Lik_pDown:
+            if Lik_pUp > Lik_pCurr:         
+                pCurr = pUp #value by step diff each time the "if" statement is met                
+            elif Lik_pDown > Lik_pCurr: #this "while" section decreases each
+                pCurr = pDown #value by step diff each time the "if" statement is met
+            pUp=pCurr+diff
+            pDown=pCurr-diff    
+            Lik_pCurr = binomialPMF(n,pCurr,k)
+            Lik_pUp = binomialPMF(n,pUp,k)
+            Lik_pDown = binomialPMF(n,pDown,k)  
+        #Here I want to hone the value so I reduce diff by half            
+        diff *= 0.5
+    return pCurr #I want to get back the p value
 
-maxLikVal = MaxLikValofP(5,0.5,4,0.1) #This seems to return the right value
-#print maxLikVal
+maxLikValP = MaxLikValofP(3,2,0.5,0.4) #This seems to return the right value
+print maxLikValP
+
 
 """
 In the exercise above, you tried to find an intuitive cutoff for likelihood ratio
@@ -405,28 +412,28 @@ that output is Lik_Curr rather than pCurr, as in the similar function above)
 '''
 
 def MaxLikVal(n,pCurr,k,diff): 
-    pUp=pCurr+diff 
-    pDown=pCurr-diff    
-    Lik_pCurr = binomialPMF(n=n,p=pCurr,k=k)
-    Lik_pUp = binomialPMF(n=n,p=pUp,k=k)
-    Lik_pDown = binomialPMF(n=n,p=pDown,k=k)
-    if (Lik_pCurr < Lik_pUp):
-        while (Lik_pCurr < Lik_pUp):
-            pCurr = pUp
-            Lik_pCurr = binomialPMF(n=n,p=pCurr,k=k)
-            pUp = pCurr + diff
-            Lik_pUp = binomialPMF(n=n,p=pUp,k=k)
-        return Lik_pCurr #Lik_pCurr this time, rather than pCurr. Important difference!!
-    else: 
-        while (Lik_pCurr < Lik_pDown):
-            pCurr = pDown
-            Lik_pCurr = binomialPMF(n=n,p=pCurr,k=k)
-            pDown = pCurr - diff
-            Lik_pDown = binomialPMF(n=n,p=pDown,k=k)
-        return Lik_pCurr #Lik_pCurr this time, rather than pCurr. Important difference!!
-    
+    while diff > 0.0001:
+        pUp=pCurr+diff
+        pDown=pCurr-diff    
+        Lik_pCurr = binomialPMF(n,pCurr,k)
+        Lik_pUp = binomialPMF(n,pUp,k)
+        Lik_pDown = binomialPMF(n,pDown,k)             
+        while Lik_pCurr < Lik_pUp or Lik_pCurr < Lik_pDown:
+            if Lik_pUp > Lik_pCurr:         
+                pCurr = pUp #value by step diff each time the "if" statement is met                
+            elif Lik_pDown > Lik_pCurr: #this "while" section decreases each
+                pCurr = pDown #value by step diff each time the "if" statement is met
+            pUp=pCurr+diff
+            pDown=pCurr-diff    
+            Lik_pCurr = binomialPMF(n,pCurr,k)
+            Lik_pUp = binomialPMF(n,pUp,k)
+            Lik_pDown = binomialPMF(n,pDown,k)  
+        #Here I want to hone the value so I reduce diff by half            
+        diff *= 0.5
+    return Lik_pCurr 
 
-#MaxLikVal(n=3,pCurr=0.6,k=2,diff=0.01)
+MaxLikValue = MaxLikVal(n=3,pCurr=0.6,k=2,diff=0.01)
+print MaxLikValue
 
 #Using the function defined above to find ML values
 MLV = []
@@ -487,11 +494,6 @@ the analysis correctly).
 # sets above?
 '''
 
-#The highest and lowest values of the ratio list apparently screw up with the
-#ln function? 21 LR values correspond to 21 p values that range from 0 through 1 
-#with 0.05 increments. For some reason, the code doesn't seem to let me pop
-#21 (position 20). It says out of range??? Also, I am only getting 18 outputs 
-#for my test1 print!!! What is going on?
 #5 trial data set
 
 
@@ -500,22 +502,39 @@ print likeliRatios2
 test1 = []
 
 for rat in likeliRatios:
-    conv = (-2)*(log(rat))
-    test1.append(conv)
+    if rat == 0.0:
+        print "Value discarded, because it produces an undefined LR."
+    else: 
+        conv = (-2)*(log(rat))
+        test1.append(conv)
 print test1
+length1 = len(test1)
+print length1
 
-#Looking over the ratio outputs I think I can eliminate ~ p = 0 through p = 0.25. 
-#Also, I can eliminate p = 1. Roughly CI of 0.3 to 0.95. (I am eliminating LR
+
+
+#Looking over the ratio outputs I think I can eliminate ~ p = 0 through p = 0.35. 
+#Also, I can eliminate p = 1. So, CI of 0.4 to 0.95. (I am eliminating LR
 # >3.85 and = 0.)
       
 test2 = [] 
 #20 trials 
 for ratio in likeliRatios2:
-    conversion = (-2)*(log(ratio))
-    test2.append(conversion)
+    if ratio == 0.0:
+        print "Value discarded, because it produces an undefined LR."
+    else: 
+        conversion = (-2)*(log(ratio))
+        test2.append(conversion)
 print test2
+length2 = len(test2)
+print length2
 
-#For some reason I'm not able to get any output from test2. Math domain error.
+
+#Looking over the ratio outputs I think I can eliminate ~ p = 0 through p = 0.35. 
+#Also, I can eliminate p = 0.8 through 1.0. So, CI of 0.4 to 0.75. (I am eliminating 
+#LR >3.85 and = 0.)
+
+
 
 # We've talked in previous classes about two ways to interpret probabilities. Which
 # interpretation are we using here to define these intervals?
