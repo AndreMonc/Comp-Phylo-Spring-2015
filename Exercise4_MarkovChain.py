@@ -147,7 +147,6 @@ print("The number of simulations out of 100 that end in state 1: " + str(count1)
 print("The number of simulations out of 100 that end in state 2: " + str(count2))
 
 #Now I'm gonna change the transition matrix so that state 1 is favored
-
 sim100Fav1 = []
 for step in range(100):
     Markov100step = MarkovChSim(n=100,state=[1,2],allProbs=[[0.8,0.2],[0.8,0.2]])
