@@ -50,14 +50,15 @@ moderate (between 0.2 and 0.8).
 """
 
 # Define a transition probability matrix for the chain with states A and B
-probmat = [[0.7,0.3],[0.6,0.4]]
+probmat = [[0.7,0.3],[0.6,0.4]] #probmat is an array--a list of lists
 
 # Try accessing a individual element or an individual row 
 # Element
-probmat[1][0] #This will access the position 1 list and position 0 element
+probmat[1][0] #This code will access the position 1 list and position 0 element
 
 # Row
-probmat[1] #This will access the entire position 1 list
+probmat[1] #This code will access the entire position 1 list (the first row in
+#in the transition probability matrix)
 
 """
 Now, write a function that simulates the behavior of this chain over n time
@@ -79,7 +80,7 @@ def DiscreteSample(xk,pk,numbOfTrial): #Adding size because it allows more
     sample = discrete.rvs(size=numbOfTrial)
     x = []
     x.append(sample)
-    y = x[0]    
+    y = x[0]  
     return y
 
 numbOfTrial = 1
@@ -106,10 +107,10 @@ def MarkovChSim(n,state=[1,2],allProbs=[[0.5,0.5],[0.5,0.5]]):
     chainStates = []
 
     #Draw a random state to initiate the chain.
-    event=[1,2]
-    prob=[0.5,0.5]
     numbOfTrial=1 #I only want one output to initiate the chain
-    currState=DiscreteSample(event,prob,numbOfTrial)
+    #The middle argument in the DiscreteSample function below simply generates
+    #a list of equal probabilities for all the elements in list "state"    
+    currState=DiscreteSample(state,[1.0/len(state) for x in state],numbOfTrial)
     chainStates.extend(currState)
     #Now I want to simulate the chain states for the interval n-1 (everything
     #after the initial state)
@@ -124,7 +125,7 @@ def MarkovChSim(n,state=[1,2],allProbs=[[0.5,0.5],[0.5,0.5]]):
 # Run a simulation of 10 steps and print the output.
 
 Markov10step = MarkovChSim(n=10,state=[1,2],allProbs=[[0.5,0.5],[0.5,0.5]])
-print Markov10step
+print ("10-step Markov Chain simulation: " + str(Markov10step))
     
 
 # ----> Try to finish the above lines before Tues, Feb. 10th <----
@@ -133,14 +134,17 @@ print Markov10step
 # end in each state? How does this change as you change the transition matrix?
 
 sim100 = []
-for step in range(100):
+for step in range(100): #This "for loop" just runs the indented code 100 times
     Markov100step = MarkovChSim(n=100,state=[1,2],allProbs=[[0.5,0.5],[0.5,0.5]])
     endState =  Markov100step[99]   
     sim100.append(endState)
 print sim100
 
-sim100.count(1)
-sim100.count(2)
+count1 = sim100.count(1)
+count2 = sim100.count(2)
+
+print("The number of simulations out of 100 that end in state 1: " + str(count1))
+print("The number of simulations out of 100 that end in state 2: " + str(count2))
 
 #Now I'm gonna change the transition matrix so that state 1 is favored
 
@@ -151,8 +155,11 @@ for step in range(100):
     sim100Fav1.append(endState)
 print sim100Fav1
 
-sim100Fav1.count(1)
-sim100Fav1.count(2)
+countfav1_1 = sim100Fav1.count(1)
+countfav1_2 = sim100Fav1.count(2)
+
+print("The number of simulations out of 100 that end in state 1 (weighted towards 1): " + str(count1))
+print("The number of simulations out of 100 that end in state 2 (weighted towards 1: " + str(count2))
 
 
 # Try defining a state space for nucleotides: A, C, G, and T. 
