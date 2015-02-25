@@ -1,5 +1,5 @@
-Work in progress . . . .
-
+Work in progress . . . 
+I received substantial help in creating this code from Glaucia, the Huelsenbeck reading, and Advanced Python for Biologist.
 
 # -*- coding: utf-8 -*-
 """
@@ -18,6 +18,7 @@ starting with a blank slate.
 
 from __future__ import division
 import random
+from math import log 
 '''
 The function below provides the randomly drawn nucleotide that seeds the Markov 
 chain simulation
@@ -29,48 +30,50 @@ class contMarkov(object):
     branchlength = 0
     i=random.choice(self.stateSpace) #This is my seed state
     
-    def __init__(self, 
-                 Q, 
-                 v, 
-                 stateSpace,
-                 ):
+    def __init__(self, Q, v, stateSpace):
         self.Q = Q
         self.v = v
         self.stateSpace = stateSpace
-                        
+
     def contMarkovSim(self):
-        list1 = [] #Exponentially-distributed waiting times
+        exDistWXs = [] #Exponentially-distributed waiting times
+        chainStates = [i] #i represents my seed state 
+        probs = []
+        potentStates = [] #This is the list of potential states for the next substitution. The reason this list cannot simply be self.statespace is that it does not contain the current state.
         
-        while branchlength < self.v        
-                        
+        def DiscreteSample(xk,pk,numbOfTrial=1): #xk = events, pk = probalilities. Pulled this function from my previous code for this class. 
+            #numbOfTrial = 1 because for the purposes of this assignment I will always want just a single output.            
+            discrete = rv_discrete(name='discrete', values=(xk,pk)) 
+            sample = discrete.rvs(size=numbOfTrial)
+            x = []
+            x.append(sample)
+            event = x[0]  
+            return event
+        while branchlength < self.v:           
             ranUnif = random.uniform(0,1)
-            lambda = -(self.Q([i][i]))
+            lambda = -(self.Q[i][i]) #defining lambda - notice that i is the first randomly seeded (in Huelsenbeck, "T" was arbitrarily chosen for this purpose)
             waitTime = -(1/lambda)*log(ranUnif)  
-            list1.append(waitTime)
-            branchlength = sum(wt for wt in list1)
+            exDistWXs.append(waitTime)
+            branchlength = sum(wt for wt in exDistWXs)
+            for rate in self.Q[i]:
+                if rate >=0:                
+                    prob = rate/lambda 
+                    probs.append(prob)
+            for state in self.statespace:
+                if state != i:
+                    potentStates.append(state)
+            i = DiscreteSample(potentStates, probs)
+            chainStates.append(i)
+            listOfStrings = [str(cs) for cs in chainStates]
+            nucSubsList = [s.replace('0','A') for s in listOfStrings]
+            nucSubsList = [s.replace('1','C') for s in listOfStrings]
+            nucSubsList = [s.replace('2','G') for s in listOfStrings]
+            nucSubsList = [s.replace('3','T') for s in listOfStrings]
+        return ("List of nucleotide substitutions: " + str(nucSubsList))
+        return ("List of waiting times between substitutions: " str(exDistWXs))
             
-        
- 
-
-
-   '''
-    #From Jeremy
-    def discSamp(events,probs):
-        ranNum = sp.random.random()
-        cumulProbs = []
-        cumulProbs.extend([probs[0]])
-        for i in range(1,len(probs)):
-            cumulProbs.extend([probs[i]+cumulProbs[-1]])
-        for i in range(0,len(probs)):
-            if ranNum < cumulProbs[i]:
-               return events[i]
-        return None
-    '''
-        
-        
-        
-Markov1 = contMarkov(Q = [[-1.916,0.541,0.787,0.588],[0.148,-1.069,0.415,0.506],[0.286,0.170,-0.591,0.135],[0.525,0.236,0.594,-1.355]]
+mkv1 = contMarkovSim(Q = [[-1.916,0.541,0.787,0.588],[0.148,-1.069,0.415,0.506],[0.286,0.170,-0.591,0.135],[0.525,0.236,0.594,-1.355]]
                      v = 5
                      stateSpace = (0,1,2,3)
                      )
-#print Markov1.contMarkSim()
+print mkv1.contMarkSim()
