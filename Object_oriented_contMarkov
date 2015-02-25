@@ -1,3 +1,8 @@
+from __future__ import division
+import random
+from math import log 
+from scipy.stats import rv_discrete
+
 # -*- coding: utf-8 -*-
 """
 Created on Tue Feb 24 14:06:39 2015
@@ -11,26 +16,21 @@ Created on Tue Feb 24 14:06:39 2015
 First I want to create the class. I use the "object" argument because this
 class is not drawing on methods from any other higher class. Thus, I am 
 starting with a blank slate.
-'''
 
-from __future__ import division
-import random
-from math import log 
-'''
 The function below provides the randomly drawn nucleotide that seeds the Markov 
 chain simulation
 '''
 
 class contMarkov(object):
-    branchlength = 0
-    i=random.choice(self.stateSpace) #This is my seed state
-    
     def __init__(self, Q, v, stateSpace):
         self.Q = Q
         self.v = v
         self.stateSpace = stateSpace
-
+ 
+    
     def contMarkovSim(self):
+        branchlength = 0
+        i=random.choice(self.stateSpace) #This is my seed state        
         exDistWXs = [] #Exponentially-distributed waiting times
         chainStates = [i] #i represents my seed state 
         probs = []
@@ -46,13 +46,13 @@ class contMarkov(object):
             return event
         while branchlength < self.v:           
             ranUnif = random.uniform(0,1)
-            lambda = -(self.Q[i][i]) #defining lambda - notice that i is the first randomly seeded (in Huelsenbeck, "T" was arbitrarily chosen for this purpose)
-            waitTime = -(1/lambda)*log(ranUnif)  
+            lda = -(self.Q[i][i]) #defining lambda - notice that i is the first randomly seeded in Huelsenbeck, "T" was arbitrarily chosen for this purpose
+            waitTime = -(1/lda)*log(ranUnif)  
             exDistWXs.append(waitTime)
             branchlength = sum(wt for wt in exDistWXs)
             for rate in self.Q[i]:
                 if rate >=0:                
-                    prob = rate/lambda 
+                    prob = rate/lda 
                     probs.append(prob)
             for state in self.statespace:
                 if state != i:
@@ -65,10 +65,9 @@ class contMarkov(object):
             nucSubsList = [s.replace('2','G') for s in listOfStrings]
             nucSubsList = [s.replace('3','T') for s in listOfStrings]
         return ("List of nucleotide substitutions: " + str(nucSubsList))
-        return ("List of waiting times between substitutions: " str(exDistWXs))
+        return ("List of waiting times between substitutions: " + str(exDistWXs))
             
-mkv1 = contMarkovSim(Q = [[-1.916,0.541,0.787,0.588],[0.148,-1.069,0.415,0.506],[0.286,0.170,-0.591,0.135],[0.525,0.236,0.594,-1.355]]
-                     v = 5
-                     stateSpace = (0,1,2,3)
-                     )
-print mkv1.contMarkSim()
+mkv1 = contMarkov([[-1.916,0.541,0.787,0.588],[0.148,-1.069,0.415,0.506],[0.286,0.170,-0.591,0.135],[0.525,0.236,0.594,-1.355]],
+                     5,
+                     [0,1,2,3])
+print mkv1.contMarkovSim()
