@@ -1,6 +1,14 @@
 '''
 Work in progress . . .
 I haven't worked out all the bugs yet from this code. The output is a bit odd!
+My nucsSubsList contains both numbers and Ts . . .
+I think I'm close though!
+'''
+
+'''
+Work in progress . . .
+I haven't worked out all the bugs yet from this code. Current issue is:
+"IndexError: index 3 is out of bounds for size 3" 
 I think I'm close though!
 '''
 
@@ -29,7 +37,7 @@ chain simulation
 
 class contMarkov(object): #This class will contain various methods relevant to continuous time Markov chain simulations
     #I've gone ahead and insterted some default values, so I can easily run tests on the various methods
-    def __init__(self, Q=[[-1.916,0.541,0.787,0.588],[0.148,-1.069,0.415,0.506],[0.286,0.170,-0.591,0.135],[0.525,0.236,0.594,-1.355]], v=10, wTimes=[]):
+    def __init__(self, Q=[[-1.916,0.541,0.787,0.588],[0.148,-1.069,0.415,0.506],[0.286,0.170,-0.591,0.135],[0.525,0.236,0.594,-1.355]], v=10, wTimes=[]): #Copied Q matrix from Huelsenbeck reading
         self.Q = Q #Q is my rate matrix (all rows sum to zero)
         self.v = v #v is my branch length (or total time)
         self.wTimes = wTimes  #wTimes are the waiting times between each nucleotide substitution
@@ -40,8 +48,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
         i=random.choice(stateSpace) #Random draw of my seed state (or nucleotide)     
         self.wTimes = [] #Exponentially-distributed waiting times
         chainStates = [i] #i represents my seed state. Subsequent states will be appended to this list. 
-        potentStates = [] #This is the list of potential states for the next substitution. The reason this list cannot simply be self.statespace is that it does not contain the current state.
-        
+                
         def DiscreteSample(xk,pk,numbOfTrial=1): #xk = events, pk = probalilities. Pulled this function from my previous code for this class. 
             #numbOfTrial = 1 because for the purposes of this assignment I will always want just a single output.            
             discrete = rv_discrete(name='discrete', values=(xk,pk)) 
@@ -52,12 +59,12 @@ class contMarkov(object): #This class will contain various methods relevant to c
             return event
         while branchlength < self.v:           
             probs = [] #This list will contain the three probabilities associated with transition from one nucleotide to a different nucleotide. I reset this list to 0 at the beginning of each while loop.
-            potentStates = []            
+            potentStates = [] #This is the list of potential states for the next substitution. The reason this list cannot simply be self.statespace is that it does not contain the current state.            
             ranUnif = random.uniform(0,1) #Drawing a random number between 0 and 1 so that I can find the exponentially-distributed waiting time using the equation a couple of lines down.
             lda = -(self.Q[i][i]) #defining lambda - notice that i is the first randomly seeded in Huelsenbeck, "T" was arbitrarily chosen for this purpose
             waitTime = -(1/lda)*log(ranUnif) #finding exponentially-distributed waiting time between substitutions
             self.wTimes.append(waitTime)
-            branchlength = sum(wt for wt in self.wTimes) #Here I simply add the waiting time for each successive substitution to the overall branchlength
+            branchlength = sum(wt for wt in self.wTimes) #Thanks Glaucia for syntax help here. I simply add the waiting time for each successive substitution to the overall branchlength
             for rate in self.Q[i]: #In this for loop I identify the non-diagonal rates (or positive rates) in the Q matrix
                 if rate >=0:                
                     prob = rate/lda #and I calculate the probabilities of each
@@ -69,11 +76,11 @@ class contMarkov(object): #This class will contain various methods relevant to c
             chainStates.append(i)
             probs[:] = []
             potentStates[:] = []
-            listOfStrings = [str(cs) for cs in chainStates]
-            nucSubsList = [s.replace('0','A') for s in listOfStrings] #Converting numbers to the nucleotides they represent. Much easier to work with numbers for everything above. Thanks to Marco for finding this syntax!
-            nucSubsList = [s.replace('1','C') for s in listOfStrings]
-            nucSubsList = [s.replace('2','G') for s in listOfStrings]
-            nucSubsList = [s.replace('3','T') for s in listOfStrings]
+        listOfStrings = [str(cs) for cs in chainStates]
+        nucSubsList = [s.replace('0','A') for s in listOfStrings] #Converting numbers to the nucleotides they represent. Much easier to work with numbers for everything above. Thanks to Marco for finding this syntax!
+        nucSubsList = [s.replace('1','C') for s in listOfStrings]
+        nucSubsList = [s.replace('2','G') for s in listOfStrings]
+        nucSubsList = [s.replace('3','T') for s in listOfStrings]
         return (("List of nucleotide substitutions: " + str(nucSubsList)) + "\nList of waiting times between substitutions: " + str(self.wTimes))
          
             
