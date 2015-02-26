@@ -1,7 +1,6 @@
 '''
 Work in progress . . .
-I haven't worked out all the bugs yet from this code. Current issue is:
-"IndexError: index 3 is out of bounds for size 3" 
+I haven't worked out all the bugs yet from this code. The output is a bit odd!
 I think I'm close though!
 '''
 
@@ -53,6 +52,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
             return event
         while branchlength < self.v:           
             probs = [] #This list will contain the three probabilities associated with transition from one nucleotide to a different nucleotide. I reset this list to 0 at the beginning of each while loop.
+            potentStates = []            
             ranUnif = random.uniform(0,1) #Drawing a random number between 0 and 1 so that I can find the exponentially-distributed waiting time using the equation a couple of lines down.
             lda = -(self.Q[i][i]) #defining lambda - notice that i is the first randomly seeded in Huelsenbeck, "T" was arbitrarily chosen for this purpose
             waitTime = -(1/lda)*log(ranUnif) #finding exponentially-distributed waiting time between substitutions
@@ -67,13 +67,15 @@ class contMarkov(object): #This class will contain various methods relevant to c
                     potentStates.append(state)
             i = DiscreteSample(potentStates, probs)
             chainStates.append(i)
+            probs[:] = []
+            potentStates[:] = []
             listOfStrings = [str(cs) for cs in chainStates]
             nucSubsList = [s.replace('0','A') for s in listOfStrings] #Converting numbers to the nucleotides they represent. Much easier to work with numbers for everything above. Thanks to Marco for finding this syntax!
             nucSubsList = [s.replace('1','C') for s in listOfStrings]
             nucSubsList = [s.replace('2','G') for s in listOfStrings]
             nucSubsList = [s.replace('3','T') for s in listOfStrings]
-        return ("List of nucleotide substitutions: " + str(nucSubsList))
-        return ("List of waiting times between substitutions: " + str(self.wTimes))
+        return (("List of nucleotide substitutions: " + str(nucSubsList)) + "\nList of waiting times between substitutions: " + str(self.wTimes))
+         
             
 mkv1 = contMarkov()
 print mkv1.contMarkovSim()
