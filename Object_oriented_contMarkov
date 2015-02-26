@@ -1,15 +1,6 @@
 '''
 Work in progress . . .
-I haven't worked out all the bugs yet from this code. The output is a bit odd!
-My nucsSubsList contains both numbers and Ts . . .
-I think I'm close though!
-'''
-
-'''
-Work in progress . . .
-I haven't worked out all the bugs yet from this code. Current issue is:
-"IndexError: index 3 is out of bounds for size 3" 
-I think I'm close though!
+Will be adding more methods to the contMarkov class
 '''
 
 from __future__ import division
@@ -73,16 +64,17 @@ class contMarkov(object): #This class will contain various methods relevant to c
                 if state != i:
                     potentStates.append(state)
             i = DiscreteSample(potentStates, probs)
-            chainStates.append(i)
+            chainStates.extend(i)
             probs[:] = []
             potentStates[:] = []
-        listOfStrings = [str(cs) for cs in chainStates]
-        nucSubsList = [s.replace('0','A') for s in listOfStrings] #Converting numbers to the nucleotides they represent. Much easier to work with numbers for everything above. Thanks to Marco for finding this syntax!
-        nucSubsList = [s.replace('1','C') for s in listOfStrings]
-        nucSubsList = [s.replace('2','G') for s in listOfStrings]
-        nucSubsList = [s.replace('3','T') for s in listOfStrings]
+        chainStates = [str(cs) for cs in chainStates]
+        nucSubsList = [s.replace('0','A') for s in chainStates] #Converting numbers to the nucleotides they represent. Much easier to work with numbers for everything above. Thanks to Marco for finding this syntax!
+        nucSubsList = [l.replace('1','C') for l in nucSubsList]
+        nucSubsList = [x.replace('2','G') for x in nucSubsList]
+        nucSubsList = [p.replace('3','T') for p in nucSubsList]
         return (("List of nucleotide substitutions: " + str(nucSubsList)) + "\nList of waiting times between substitutions: " + str(self.wTimes))
          
             
 mkv1 = contMarkov()
 print mkv1.contMarkovSim()
+
