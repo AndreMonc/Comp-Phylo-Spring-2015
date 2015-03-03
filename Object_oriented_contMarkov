@@ -113,7 +113,14 @@ class contMarkov(object): #This class will contain various methods relevant to c
             self.mpList.append(val)
         return self.mpList
        
-   
+    def historyProb(self):
+        '''
+        This function will output the probability of the whole character history
+        provided by the markov chain simulation
+        '''
+        #failed attempt: firstProb = self.DiscreteSample(xk=self.stateSpace, pk=self.margProbList)
+        firstProb = self.DiscreteSample(self.stateSpace, self.mpList)
+        return firstProb
     
         
     
@@ -123,17 +130,10 @@ d = contMarkov()
 #print d.contMarkovSim()
 print d.allMargProb()
 print d.margProbList()
-#print d.historyProb()
+print d.historyProb()
 
 
-'''  
-def historyProb(self):
-    
-This function will output the probability of the whole character history
-provided by the markov chain simulation
 
-#failed attempt: firstProb = self.DiscreteSample(xk=self.stateSpace, pk=self.margProbList)
-firstProb = self.DiscreteSample(self.stateSpace, self.mpList)
-return firstProb
-'''
+
+
 
