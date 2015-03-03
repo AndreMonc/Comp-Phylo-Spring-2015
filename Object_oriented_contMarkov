@@ -1,5 +1,6 @@
 '''
 Work in progress . . .
+
 '''
 
 from __future__ import division
@@ -8,6 +9,7 @@ from math import log
 from scipy.stats import rv_discrete
 import scipy as sp
 import numpy as np
+from scipy.stats import norm
 
 
 # -*- coding: utf-8 -*-
@@ -30,34 +32,38 @@ chain simulation
 
 class contMarkov(object): #This class will contain various methods relevant to continuous time Markov chain simulations
     #I've gone ahead and insterted some default values, so I can easily run tests on the various methods
-    def __init__(self, Q=[[-1.916,0.541,0.787,0.588],
+    def __init__(self, Q=[[-1.916,0.541,0.787,0.588], #Copied Q matrix from Huelsenbeck reading
                           [0.148,-1.069,0.415,0.506],
                           [0.286,0.170,-0.591,0.135],
                           [0.525,0.236,0.594,-1.355]], 
                        v=10, 
-                       wTimes=[]): #Copied Q matrix from Huelsenbeck reading
+                       wTimes=[],
+                       chainStates=[], 
+                       stateSpace = [0,1,2,3],
+                       margArray = [],
+                       mpList = []):
         self.Q = Q #Q is my rate matrix (all rows sum to zero)
         self.v = v #v is my branch length (or total time)
         self.wTimes = wTimes  #wTimes are the waiting times between each nucleotide substitution
-        self.margProb() #creates marginal probabilities for Q matrix and shows in array
-        #self.margArray = ()
-
-           
+        self.chainStates = chainStates
+        self.stateSpace = stateSpace
+        self.margArray = margArray
+        self.mpList = mpList
+    
+    def DiscreteSample(self,xk,pk,numbOfTrial=1): #xk = events, pk = probalilities. Pulled this function from my previous code for this class. 
+        #numbOfTrial = 1 because for the purposes of this assignment I will always want just a single output.            
+        discrete = rv_discrete(name='discrete', values=(xk,pk)) 
+        sample = discrete.rvs(size=numbOfTrial)
+        x = []
+        x.append(sample)
+        event = x[0]  
+        return event  
+    
     def contMarkovSim(self): #This function will run the continuous Markov simulation
-        stateSpace = (0,1,2,3) #I created the stateSpace as a tuple because I don't ever want to change it. I am always going to want to use this model on four states, corresponding to the four nucleotides in DNA (A=0,C=1,G=2,T=3)
         branchlength = 0 #Just setting my branchlength to the starting length
-        i=random.choice(stateSpace) #Random draw of my seed state (or nucleotide)     
+        i=random.choice(self.stateSpace) #Random draw of my seed state (or nucleotide)     
         self.wTimes = [] #Exponentially-distributed waiting times
-        chainStates = [i] #i represents my seed state. Subsequent states will be appended to this list. 
-             
-        def DiscreteSample(xk,pk,numbOfTrial=1): #xk = events, pk = probalilities. Pulled this function from my previous code for this class. 
-            #numbOfTrial = 1 because for the purposes of this assignment I will always want just a single output.            
-            discrete = rv_discrete(name='discrete', values=(xk,pk)) 
-            sample = discrete.rvs(size=numbOfTrial)
-            x = []
-            x.append(sample)
-            event = x[0]  
-            return event
+        self.chainStates = [i] #i represents my seed state. Subsequent states will be appended to this list.      
         while branchlength < self.v:           
             probs = [] #This list will contain the three probabilities associated with transition from one nucleotide to a different nucleotide. I reset this list to 0 at the beginning of each while loop.
             potentStates = [] #This is the list of potential states for the next substitution. The reason this list cannot simply be self.statespace is that it does not contain the current state.            
@@ -70,23 +76,23 @@ class contMarkov(object): #This class will contain various methods relevant to c
                 if rate >=0:                
                     prob = rate/lda #and I calculate the probabilities of each
                     probs.append(prob)
-            for state in stateSpace: #In this forloop I identify the possible nucleotide state and append to a list
+            for state in self.stateSpace: #In this forloop I identify the possible nucleotide state and append to a list
                 if state != i:
-                    potentStates.append(state)
-            i = DiscreteSample(potentStates, probs)
-            chainStates.extend(i)
+                    potentStates.append(state)           
+            i = self.DiscreteSample(potentStates, probs)
+            self.chainStates.extend(i)
             probs[:] = []
             potentStates[:] = []
-        chainStates = [str(cs) for cs in chainStates]
-        nucSubsList = [s.replace('0','A') for s in chainStates] #Converting numbers to the nucleotides they represent. Much easier to work with numbers for everything above. Thanks to Marco for finding this syntax!
-        nucSubsList = [l.replace('1','C') for l in nucSubsList]
-        nucSubsList = [x.replace('2','G') for x in nucSubsList]
-        nucSubsList = [p.replace('3','T') for p in nucSubsList]
-        return (("List of nucleotide substitutions: " + str(nucSubsList)) + "\nList of waiting times between substitutions: " + str(self.wTimes))
+        self.chainStates = [str(cs) for cs in self.chainStates]
+        self.chainStates = [s.replace('0','A') for s in self.chainStates] #Converting numbers to the nucleotides they represent. Much easier to work with numbers for everything above. Thanks to Marco for finding this syntax!
+        self.chainStates = [l.replace('1','C') for l in self.chainStates]
+        self.chainStates = [x.replace('2','G') for x in self.chainStates]
+        self.chainStates = [p.replace('3','T') for p in self.chainStates]
+        return (("List of nucleotide substitutions: " + str(self.chainStates)) + "\nList of waiting times between substitutions: " + str(self.wTimes))
+    
+                    
             
-       
-        
-    def margProb(self, chainLength = 150):   
+    def allMargProb(self, chainLength = 150):   
         qArray = np.squeeze(np.asarray(self.Q))#Could not get matrix exponentiation to work, so I tried grabbing this line of code from Glaucia 
                
         '''
@@ -99,7 +105,35 @@ class contMarkov(object): #This class will contain various methods relevant to c
         return self.margArray
         #How do I return the description for an array?
         #Finally got this to work!!!
-#d = contMarkov()
-#print d.margProb()
+    
+    def margProbList(self): #gives a list of the four marginal probabilities (1/nucleotide transition)
+        list = []        
+        for i in range(0,4):
+            val = d.margArray[i][i]
+            list.append(val)
+        return list
+       
+   
+    
+        
+    
 
+
+d = contMarkov()
+#print d.contMarkovSim()
+print d.allMargProb()
+print d.margProbList()
+#print d.historyProb()
+
+
+'''  
+def historyProb(self):
+    
+This function will output the probability of the whole character history
+provided by the markov chain simulation
+
+#failed attempt: firstProb = self.DiscreteSample(xk=self.stateSpace, pk=self.margProbList)
+firstProb = self.DiscreteSample(self.stateSpace, self.mpList)
+return firstProb
+'''
 
