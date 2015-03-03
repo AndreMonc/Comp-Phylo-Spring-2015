@@ -107,11 +107,11 @@ class contMarkov(object): #This class will contain various methods relevant to c
         #Finally got this to work!!!
     
     def margProbList(self): #gives a list of the four marginal probabilities (1/nucleotide transition)
-        list = []        
+        self.mpList = []        
         for i in range(0,4):
             val = d.margArray[i][i]
-            list.append(val)
-        return list
+            self.mpList.append(val)
+        return self.mpList
        
    
     
