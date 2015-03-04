@@ -138,7 +138,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
         firstState = self.DiscreteSample(self.stateSpace, self.mpList)
         probList.append(self.mpList[firstState])
          
-        print ("Prob List: " + str(probList))
+        #print ("Prob List: " + str(probList))
         
         # Step 2. Calculate probability of all waiting times up to the last waiting time
         for s in self.chainStates:        
@@ -152,11 +152,11 @@ class contMarkov(object): #This class will contain various methods relevant to c
                 5.5 probList.append(wtPDFs) #storing results in the probability 
                 list.
                 '''
-        print ("Prob List2: " + str(probList)) 
+        #print ("Prob List2: " + str(probList)) 
         # Step 3. Calculate the probability for all nucleotides after the first nucleotide
         probList.extend(self.allTProbs[1:]) #appending every element after the first nucleotide transition probability 
-        print ("Self Probs: " + str(self.allTProbs))
-        print ("Prob List3: " + str(probList))
+        #print ("Self Probs: " + str(self.allTProbs))
+        #print ("Prob List3: " + str(probList))
                
         # Step 4. Calculate the probability of the last waiting time (1-CDF(tFinal))
         lastNuc = self.chainStates[-1]
@@ -164,7 +164,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
         cdf = 1.0 - exp(-(self.Q[lastNuc][lastNuc]) * lastWT) # cdf = cumulative distribution function of the last waiting time
         lastWTProb = 1.0 - cdf
         probList.append(lastWTProb)
-        print ("Prob List4: " + str(probList))
+        #print ("Prob List4: " + str(probList))
     
         # Step 5. Multiply every element in the list together
         probOfCharacterHistory = functools.reduce(operator.mul, probList, 1)
