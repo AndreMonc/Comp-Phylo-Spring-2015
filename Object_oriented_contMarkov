@@ -10,6 +10,9 @@ from scipy.stats import rv_discrete
 import scipy as sp
 import numpy as np
 from scipy.stats import norm
+from math import exp
+import operator
+import functools
 
 
 # -*- coding: utf-8 -*-
@@ -41,7 +44,8 @@ class contMarkov(object): #This class will contain various methods relevant to c
                        chainStates=[], 
                        stateSpace = [0,1,2,3],
                        margArray = [],
-                       mpList = []):
+                       mpList = [],
+                       allTProbs = []):
         self.Q = Q #Q is my rate matrix (all rows sum to zero)
         self.v = v #v is my branch length (or total time)
         self.wTimes = wTimes  #wTimes are the waiting times between each nucleotide substitution
@@ -49,6 +53,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
         self.stateSpace = stateSpace
         self.margArray = margArray
         self.mpList = mpList
+        self.allTProbs = allTProbs
     
     def DiscreteSample(self,xk,pk,numbOfTrial=1): #xk = events, pk = probalilities. Pulled this function from my previous code for this class. 
         #numbOfTrial = 1 because for the purposes of this assignment I will always want just a single output.            
@@ -67,6 +72,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
         while branchlength < self.v:           
             probs = [] #This list will contain the three probabilities associated with transition from one nucleotide to a different nucleotide. I reset this list to 0 at the beginning of each while loop.
             potentStates = [] #This is the list of potential states for the next substitution. The reason this list cannot simply be self.statespace is that it does not contain the current state.            
+            self.allTProbs = []
             ranUnif = random.uniform(0,1) #Drawing a random number between 0 and 1 so that I can find the exponentially-distributed waiting time using the equation a couple of lines down.
             lda = -(self.Q[i][i]) #defining lambda - notice that i is the first randomly seeded in Huelsenbeck, "T" was arbitrarily chosen for this purpose
             waitTime = -(1/lda)*log(ranUnif) #finding exponentially-distributed waiting time between substitutions
@@ -76,6 +82,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
                 if rate >=0:                
                     prob = rate/lda #and I calculate the probabilities of each
                     probs.append(prob)
+                    self.allTProbs.append(prob)
             for state in self.stateSpace: #In this forloop I identify the possible nucleotide state and append to a list
                 if state != i:
                     potentStates.append(state)           
@@ -83,22 +90,23 @@ class contMarkov(object): #This class will contain various methods relevant to c
             self.chainStates.extend(i)
             probs[:] = []
             potentStates[:] = []
-        self.chainStates = [str(cs) for cs in self.chainStates]
-        self.chainStates = [s.replace('0','A') for s in self.chainStates] #Converting numbers to the nucleotides they represent. Much easier to work with numbers for everything above. Thanks to Marco for finding this syntax!
-        self.chainStates = [l.replace('1','C') for l in self.chainStates]
-        self.chainStates = [x.replace('2','G') for x in self.chainStates]
-        self.chainStates = [p.replace('3','T') for p in self.chainStates]
+        self.chainStates = [int(s) for s in self.chainStates]
         return (("List of nucleotide substitutions: " + str(self.chainStates)) + "\nList of waiting times between substitutions: " + str(self.wTimes))
     
-                    
-            
+    def conv2Letters(self):        
+        letters = [str(cs) for cs in self.chainStates]
+        letters = [s.replace('0','A') for s in letters] #Converting numbers to the nucleotides they represent. Much easier to work with numbers for everything above. Thanks to Marco for finding this syntax!
+        letters = [l.replace('1','C') for l in letters]
+        letters = [x.replace('2','G') for x in letters]
+        letters = [p.replace('3','T') for p in letters]      
+        return ("List of nucleotide substitutions in letters: " + str(letters))       
+             
     def allMargProb(self, chainLength = 150):   
-        qArray = np.squeeze(np.asarray(self.Q))#Could not get matrix exponentiation to work, so I tried grabbing this line of code from Glaucia 
-               
         '''
         This function will calculate the marginal probabilities of the Q rate
         matrix using a built in function "exmp"
         '''
+        qArray = np.squeeze(np.asarray(self.Q))#Could not get matrix exponentiation to work, so I tried grabbing this line of code from Glaucia 
         val = sp.linalg.expm(qArray*self.v)
         self.margArray = val
         #return ("Array of marginal probabilities derived from Q matrix: ") 
@@ -111,28 +119,68 @@ class contMarkov(object): #This class will contain various methods relevant to c
         for i in range(0,4):
             val = d.margArray[i][i]
             self.mpList.append(val)
-        return self.mpList
-       
+        return ("List of the four marginal probabilities: " + str(self.mpList))
+
+        
     def historyProb(self):
         '''
-        This function will output the probability of the whole character history
-        provided by the markov chain simulation
-        '''
-        #failed attempt: firstProb = self.DiscreteSample(xk=self.stateSpace, pk=self.margProbList)
-        firstProb = self.DiscreteSample(self.stateSpace, self.mpList)
-        return firstProb
-    
+        The goal of this function is to output the probability of the whole character history
+        provided by the Markov chain simulation
+        Jeremy provided the calculation pattern needed:
+        P(firstNuc)*P(firstWaitingTime)*P(secNuc/firstNuc) . . . *P(1-cdf(lastWaitingTime))
         
+        General strategy is to store all the relevant probabilities into a single list and then 
+        multiple together all elements within that list. 
+        '''
+        
+        # Step 1. Calculate the probability of the first nucleotide
+        probList = []
+        firstProb = self.DiscreteSample(self.stateSpace, self.mpList)
+        probList.append(firstProb)
+        
+        # Step 2. Calculate probability of all waiting times up to the last waiting time
+        for s in self.chainStates:        
+            for wt in self.wTimes:
+                wtPDFs = -self.Q[s][s]*exp(-(-self.Q[s][s])*wt) 
+                probList.append(wtPDFs)
+                '''
+                #Above I find the probability density function for each of the 
+                exponentially distributed waiting times. The equation for the 
+                exponential distribution is found in the prob textbook section 
+                5.5 probList.append(wtPDFs) #storing results in the probability 
+                list.
+                '''
+        # Step 3. Calculate the probability for all nucleotides after the first nucleotide
+        allNucTP = [] 
+        allNucTP.append(self.allTProbs)
+        del allNucTP[0] #removing the first nucleotide transition probability from the list of all transition probabilities
+        probList.append(allNucTP) #storing all transition probs after the first one
+        
+        # Step 4. Calculate the probability of the last waiting time (1-CDF(tFinal))
+        lastNuc = self.chainStates[-1]
+        lastWT = self.wTimes[-1]       
+        cdf = 1 - exp(-(self.Q[lastNuc][lastNuc]) * lastWT) # cdf = cumulative distribution function of the last waiting time
+        lastWTProb = 1 - cdf
+        probList.append(lastWTProb)
+        
+        # Step 5. Multiply every element in the list together
+        probOfCharacterHistory = functools.reduce(operator.mul, probList, 1)
+        return ("The probability of the character history is: " + str(probOfCharacterHistory))
     
+    
+ 
+        
 
 
 d = contMarkov()
-#print d.contMarkovSim()
+
+print d.contMarkovSim()
+#print d.conv2Letters()
 print d.allMargProb()
 print d.margProbList()
+print d.wTimes
+print d.chainStates
 print d.historyProb()
-
-
 
 
 
