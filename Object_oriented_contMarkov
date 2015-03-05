@@ -113,7 +113,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
         return self.margArray
         #How do I return the description for an array?
         #Finally got this to work!!!
-    
+     
     def margProbList(self): #gives a list of the four marginal probabilities (1/nucleotide transition)
         self.mpList = []        
         for i in range(0,4):
@@ -170,6 +170,35 @@ class contMarkov(object): #This class will contain various methods relevant to c
         probOfCharacterHistory = functools.reduce(operator.mul, probList, 1)
         return ("The probability of the character history is: " + str(probOfCharacterHistory))
     
+    """
+    Work in progress!!    
+    def optimizeChainL(self, diff=0.1):
+        
+        first = self.chainStates[0]
+        last = self.chain[-1]
+        
+        
+        while diff > 0.0001:
+            clCurr = self.v            
+            clUp=pCurr+diff
+            clDown=pCurr-diff    
+            Lik_clCurr = 
+            Lik_clUp = 
+            Lik_clDown =         
+            while Lik_pCurr < Lik_pUp or Lik_pCurr < Lik_pDown:
+                if Lik_pUp > Lik_pCurr:         
+                    pCurr = pUp #value by step diff each time the "if" statement is met                
+                elif Lik_pDown > Lik_pCurr: #this "while" section decreases each
+                    pCurr = pDown #value by step diff each time the "if" statement is met
+                pUp=pCurr+diff
+                pDown=pCurr-diff    
+                Lik_pCurr = 
+                Lik_pUp = 
+                Lik_pDown =  
+            #Here I want to hone the value so I reduce diff by half            
+            diff *= 0.5
+        return pCurr #I want to get back the p value
+    """
     
  
         
