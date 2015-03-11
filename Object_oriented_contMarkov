@@ -102,7 +102,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
             self.chainStates.extend(i)
             probs[:] = []
             potentStates[:] = []
-        return (("List of nucleotide substitutions: " + str(self.chainStates)) + "\nList of waiting times between substitutions: " + str(self.wTimes))
+        return (("List of nucleotide substitutions: \n" + str(self.chainStates)) + "\nList of waiting times between substitutions: \n" + str(self.wTimes))
     
     def conv2Letters(self):        
         letters = [str(cs) for cs in self.chainStates]
@@ -164,7 +164,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
                 
         # Step 3. Calculate the probability for all nucleotides after the first nucleotide
         probList.extend(self.allTProbs[1:]) #appending every element after the first nucleotide transition probability 
-        
+       
                
         # Step 4. Calculate the probability of the last waiting time (1-CDF(tFinal))
         lastNuc = self.chainStates[-1]
@@ -172,11 +172,11 @@ class contMarkov(object): #This class will contain various methods relevant to c
         cdf = 1.0 - exp(-(self.Q[lastNuc][lastNuc]) * lastWT) # cdf = cumulative distribution function of the last waiting time
         lastWTProb = 1.0 - cdf
         probList.append(lastWTProb)
-        
+       
         # Step 5. Multiply every element in the list together
         probOfCharacterHistory = functools.reduce(operator.mul, probList, 1)
         return ("The probability of the character history is: " + str(probOfCharacterHistory))
- 
+        
        
     """
     Work in progress!!    
@@ -217,7 +217,7 @@ d = contMarkov()
 print d.contMarkovSim()
 #print d.conv2Letters()
 #print d.allMargProb()
-print d.margProbList()
+#print d.margProbList()
 print d.historyProb()
 
 
