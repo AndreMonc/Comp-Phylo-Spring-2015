@@ -9,7 +9,7 @@ from math import log
 from scipy.stats import rv_discrete
 import scipy as sp
 import numpy as np
-from scipy.stats import norm
+#from scipy.stats import norm
 from math import exp
 import operator
 import functools
@@ -39,7 +39,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
                           [0.148,-1.069,0.415,0.506],
                           [0.286,0.170,-0.591,0.135],
                           [0.525,0.236,0.594,-1.355]], 
-                       v=10, 
+                       v=100, 
                        wTimes=[],
                        chainStates=[], 
                        stateSpace = [0,1,2,3],
@@ -49,14 +49,25 @@ class contMarkov(object): #This class will contain various methods relevant to c
         self.Q = Q #Q is my rate matrix (all rows sum to zero)
         self.v = v #v is my branch length (or total time)
         self.wTimes = wTimes  #wTimes are the waiting times between each nucleotide substitution
-        self.chainStates = chainStates
-        self.stateSpace = stateSpace
-        self.margArray = margArray
-        self.mpList = mpList
+        self.chainStates = chainStates #the states that comprise the Markov chain 
+        self.stateSpace = stateSpace #the four possible states drawn from to make the Markov chain (numbers that correspond to the four nucleotides)
+        self.mpList = mpList #a list of the four marginal probabilities (1/nucleotide transition) associated with the four elements in the statespace       
+        self.margArray = margArray #an array of marginal probabilities derived from Q matrix
         self.allTProbs = allTProbs
+        
+        self.allMargProb()
+        self.margProbList()    
+        self.DiscreteSample()    
+       
+        self.contMarkovSim()              
+        self.conv2Letters()
+        self.historyProb()
+        
+        
+        
     
-    def DiscreteSample(self,xk,pk,numbOfTrial=1): #xk = events, pk = probalilities. Pulled this function from my previous code for this class. 
-        #numbOfTrial = 1 because for the purposes of this assignment I will always want just a single output.            
+    def DiscreteSample(self,xk=[0,1],pk=[0.5,0.5],numbOfTrial=1): #xk = events, pk = probalilities. Pulled this function from my previous code for this class. 
+        #numbOfTrial = 1 because for the purposes of this assignment I will always want just a single output.                   
         discrete = rv_discrete(name='discrete', values=(xk,pk)) 
         sample = discrete.rvs(size=numbOfTrial)
         x = []
@@ -66,25 +77,25 @@ class contMarkov(object): #This class will contain various methods relevant to c
     
     def contMarkovSim(self): #This function will run the continuous Markov simulation
         branchlength = 0 #Just setting my branchlength to the starting length
-        i=random.choice(self.stateSpace) #Random draw of my seed state (or nucleotide)     
+        M = self.DiscreteSample(self.stateSpace, self.mpList) #Random draw of my seed state (or nucleotide) 
+        i = M[0] #If I don't take this step, then my seed state is in its own list within the chainState list
         self.wTimes = [] #Exponentially-distributed waiting times
         self.chainStates = [i] #i represents my seed state. Subsequent states will be appended to this list.      
         self.allTProbs = []
         while branchlength < self.v:           
             probs = [] #This list will contain the three probabilities associated with transition from one nucleotide to a different nucleotide. I reset this list to 0 at the beginning of each while loop.
             potentStates = [] #This is the list of potential states for the next substitution. The reason this list cannot simply be self.statespace is that it does not contain the current state.            
-            
             ranUnif = random.uniform(0,1) #Drawing a random number between 0 and 1 so that I can find the exponentially-distributed waiting time using the equation a couple of lines down.
-            lda = -(self.Q[i][i]) #defining lambda - notice that i is the first randomly seeded in Huelsenbeck, "T" was arbitrarily chosen for this purpose
+            lda = -(self.Q[i][i]) #defining lambda (relative rate of leaving seeded state) - notice that i is the seeded state (chosen based on marginal probabilities)
             waitTime = -(1/lda)*log(ranUnif) #finding exponentially-distributed waiting time between substitutions
-            self.wTimes.append(waitTime)
+            self.wTimes.append(waitTime) #append each waiting time to a list
             branchlength = sum(wt for wt in self.wTimes) #Thanks Glaucia for syntax help here. I simply add the waiting time for each successive substitution to the overall branchlength
             for rate in self.Q[i]: #In this for loop I identify the non-diagonal rates (or positive rates) in the Q matrix
                 if rate >=0:                
                     prob = rate/lda #and I calculate the probabilities of each
                     probs.append(prob)
                     self.allTProbs.append(prob)
-            for state in self.stateSpace: #In this forloop I identify the possible nucleotide state and append to a list
+            for state in self.stateSpace: #In this for loop I identify the possible nucleotide states for the next substitution and append to a list
                 if state != i:
                     potentStates.append(state)           
             i = self.DiscreteSample(potentStates, probs)
@@ -117,7 +128,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
     def margProbList(self): #gives a list of the four marginal probabilities (1/nucleotide transition)
         self.mpList = []        
         for i in range(0,4):
-            val = d.margArray[i][i]
+            val = self.margArray[i][i]
             self.mpList.append(val)
         return ("List of the four marginal probabilities: " + str(self.mpList))
 
@@ -138,7 +149,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
         firstState = self.DiscreteSample(self.stateSpace, self.mpList)
         probList.append(self.mpList[firstState])
          
-        #print ("Prob List: " + str(probList))
+        print ("Prob List1: " + str(probList))
         
         # Step 2. Calculate probability of all waiting times up to the last waiting time
         for s in self.chainStates:        
@@ -152,11 +163,11 @@ class contMarkov(object): #This class will contain various methods relevant to c
                 5.5 probList.append(wtPDFs) #storing results in the probability 
                 list.
                 '''
-        #print ("Prob List2: " + str(probList)) 
+        print ("Prob List2: " + str(probList)) 
         # Step 3. Calculate the probability for all nucleotides after the first nucleotide
         probList.extend(self.allTProbs[1:]) #appending every element after the first nucleotide transition probability 
-        #print ("Self Probs: " + str(self.allTProbs))
-        #print ("Prob List3: " + str(probList))
+        print ("Self Probs: \n" + str(self.allTProbs))
+        print ("Prob List3: \n" + str(probList))
                
         # Step 4. Calculate the probability of the last waiting time (1-CDF(tFinal))
         lastNuc = self.chainStates[-1]
@@ -164,12 +175,12 @@ class contMarkov(object): #This class will contain various methods relevant to c
         cdf = 1.0 - exp(-(self.Q[lastNuc][lastNuc]) * lastWT) # cdf = cumulative distribution function of the last waiting time
         lastWTProb = 1.0 - cdf
         probList.append(lastWTProb)
-        #print ("Prob List4: " + str(probList))
+        print ("Prob List4: " + str(probList))
     
         # Step 5. Multiply every element in the list together
         probOfCharacterHistory = functools.reduce(operator.mul, probList, 1)
         return ("The probability of the character history is: " + str(probOfCharacterHistory))
-    
+        
     """
     Work in progress!!    
     def optimizeChainL(self, diff=0.1):
@@ -179,9 +190,9 @@ class contMarkov(object): #This class will contain various methods relevant to c
         
         
         while diff > 0.0001:
-            clCurr = self.v            
-            clUp=pCurr+diff
-            clDown=pCurr-diff    
+            vCurr = self.v            
+            vUp=pCurr+diff
+            vDown=pCurr-diff    
             Lik_clCurr = 
             Lik_clUp = 
             Lik_clDown =         
@@ -208,10 +219,8 @@ d = contMarkov()
 
 print d.contMarkovSim()
 #print d.conv2Letters()
-print d.allMargProb()
+#print d.allMargProb()
 print d.margProbList()
-print d.wTimes
-print d.chainStates
 print d.historyProb()
 
 
