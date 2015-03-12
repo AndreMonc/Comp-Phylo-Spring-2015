@@ -249,7 +249,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
         return ("Maximum likelihood branchlength for Markov chain given known starting and ending states: \n" + str(BrlCurr)) #I want to get back the Likelihood value
     
     
-    def multCTMC(self):
+    def multCTMC(self): #This method will allow me to run many continuous Markov simulations and store the results as a list of lists
         for int in range(self.numSims):
             self.multChains.append(self.contMarkovSim()[0]) #borrowed Oscar's syntax here
         return self.multChains
