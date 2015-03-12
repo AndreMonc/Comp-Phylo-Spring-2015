@@ -240,7 +240,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
             
         return ("Maximum likelihood branchlength for Markov chain given known starting and ending states: \n" + str(BrlCurr)) #I want to get back the Likelihood value
     
-    #def new method to run character history many times
+    #def new method to run continuous Markov chain many times
     
 
 
