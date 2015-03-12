@@ -177,35 +177,41 @@ class contMarkov(object): #This class will contain various methods relevant to c
         return ("The probability of the character history is: " + str(probOfCharacterHistory))
         
        
-    """
-    Work in progress!!    
-    def optimizeChainL(self, diff=0.1):
-        
+    
+    
+    def optimizeBrl(self, BrlCurr=0.5, diff=0.1):
         first = self.chainStates[0]
-        last = self.chain[-1]
+        last = self.chainStates[-1]
         
         
         while diff > 0.0001:
-            vCurr = self.v            
-            vUp=pCurr+diff
-            vDown=pCurr-diff    
-            Lik_clCurr = 
-            Lik_clUp = 
-            Lik_clDown =         
-            while Lik_pCurr < Lik_pUp or Lik_pCurr < Lik_pDown:
-                if Lik_pUp > Lik_pCurr:         
-                    pCurr = pUp #value by step diff each time the "if" statement is met                
-                elif Lik_pDown > Lik_pCurr: #this "while" section decreases each
-                    pCurr = pDown #value by step diff each time the "if" statement is met
-                pUp=pCurr+diff
-                pDown=pCurr-diff    
-                Lik_pCurr = 
-                Lik_pUp = 
-                Lik_pDown =  
+            BrlUp = BrlCurr + diff            
+            BrlDown = BrlCurr - diff
+            
+            qArray = np.squeeze(np.asarray(self.Q))#Could not get matrix exponentiation to work, so I tried grabbing this line of code from Glaucia 
+            marg_BrlCurr = sp.linalg.expm(qArray*BrlCurr)
+            marg_BrlUp = sp.linalg.expm(qArray*BrlUp)
+            marg_BrlDown = sp.linalg.expm(qArray*BrlDown)
+            Lik_BrlCurr = marg_BrlCurr[first][last]
+            Lik_BrlUp = marg_BrlUp[first][last]
+            Lik_BrlDown = marg_BrlDown[first][last]            
+            while Lik_BrlCurr < Lik_BrlUp or Lik_BrlCurr < Lik_BrlDown:
+                if Lik_BrlUp > Lik_BrlCurr:         
+                    BrlCurr = BrlUp #value by step diff each time the "if" statement is met                
+                elif Lik_BrlDown > Lik_BrlCurr: #this "while" section decreases each
+                    BrlCurr = BrlDown #value by step diff each time the "if" statement is met
+                BrlUp = BrlCurr + diff            
+                BrlDown = BrlCurr - diff  
+                marg_BrlCurr = sp.linalg.expm(qArray*BrlCurr)
+                marg_BrlUp = sp.linalg.expm(qArray*BrlUp)
+                marg_BrlDown = sp.linalg.expm(qArray*BrlDown)
+                Lik_BrlCurr = marg_BrlCurr[first][last]
+                Lik_BrlUp = marg_BrlUp[first][last]
+                Lik_BrlDown = marg_BrlDown[first][last]
             #Here I want to hone the value so I reduce diff by half            
             diff *= 0.5
-        return pCurr #I want to get back the p value
-    """
+        return ("Maximum likelihood branchlength for Markov chain given known starting and ending states: \n" + str(BrlCurr)) #I want to get back the Likelihood value
+    
 
 
 d = contMarkov()
@@ -215,6 +221,8 @@ print d.conv2Letters()
 print d.allMargProb()
 print d.margProbList()
 print d.historyProb()
+print d.optimizeBrl()
+
 
 
 
