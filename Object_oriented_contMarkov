@@ -236,7 +236,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
                 Lik_BrlCurr = self.allMargProb(chainLength = BrlCurr)[first][last]
                 Lik_BrlUp = self.allMargProb(chainLength = BrlUp)[first][last]
                 Lik_BrlDown = self.allMargProb(chainLength = BrlDown)[first][last]
-                print Lik_BrlCurr  
+                print Lik_BrlCurr  #Shows that every now and then the likelihood values shoot off to infinity . . .
             #Here I want to hone the value so I reduce diff by half            
             diff *= 0.5
         return ("Maximum likelihood branchlength for Markov chain given known starting and ending states: \n" + str(BrlCurr)) #I want to get back the Likelihood value
