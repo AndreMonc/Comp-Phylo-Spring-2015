@@ -148,7 +148,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
             potentStates[:] = []
         #print ("Branchlength directly from simulation: " + str(branchlength))
         #return (("List of nucleotide substitutions: \n" + str(self.chainStates)) + "\nList of waiting times between substitutions: \n" + str(self.wTimes))
-        return self.chainStates, self.wTimes
+        return self.chainStates#, self.wTimes
    
     def conv2Letters(self):        
         letters = [str(cs) for cs in self.chainStates]
@@ -164,7 +164,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
         matrix using a built in function "exmp"
         '''
         qArray = np.squeeze(np.asarray(self.Q))#Could not get matrix exponentiation to work, so I tried grabbing this line of code from Glaucia 
-        val = sp.linalg.expm(qArray*self.v)
+        val = sp.linalg.expm(qArray*chainLength)
         self.margArray = val
         #return ("Array of marginal probabilities derived from Q matrix: ") 
         return self.margArray
@@ -214,37 +214,29 @@ class contMarkov(object): #This class will contain various methods relevant to c
        
     
     
-    def optimizeBrl(self, BrlCurr=0.5, diff=0.01,thresh=0.0001): #This function is very similar to my earlier optimization function. Goal: find most likely branchlength given a starting and ending state.
-        
-        #If BrlCurr is <0 ==0 need to fix
+    def optimizeBrl(self, BrlCurr=0.5, diff=0.01,thresh=0.001): #This function is very similar to my earlier optimization function. Goal: find most likely branchlength given a starting and ending state.
+      
         while diff > thresh: #This while statement limits the resolution of the optimization (and prevents getting stuck in the second while loop)
             first = self.chainStates[0]
             last = self.chainStates[-1]            
             BrlUp = BrlCurr + diff            
             BrlDown = BrlCurr - diff
-            qArray = np.squeeze(np.asarray(self.Q))#Could not get matrix exponentiation to work, so I tried grabbing this line of code from Glaucia 
-            marg_BrlCurr = sp.linalg.expm(qArray*BrlCurr)
-            marg_BrlUp = sp.linalg.expm(qArray*BrlUp)
-            marg_BrlDown = sp.linalg.expm(qArray*BrlDown)
-            Lik_BrlCurr = marg_BrlCurr[first][last]
-            Lik_BrlUp = marg_BrlUp[first][last]
-            Lik_BrlDown = marg_BrlDown[first][last]            
+            Lik_BrlCurr = self.allMargProb(chainLength = BrlCurr)[first][last]
+            Lik_BrlUp = self.allMargProb(chainLength = BrlUp)[first][last]
+            Lik_BrlDown = self.allMargProb(chainLength = BrlDown)[first][last]
             while Lik_BrlCurr < Lik_BrlUp or Lik_BrlCurr < Lik_BrlDown:
-                
+                if BrlCurr < 0: 
+                    BrlCurr = 0 
                 if Lik_BrlUp > Lik_BrlCurr:         
                     BrlCurr = BrlUp #value by step diff each time the "if" statement is met                
                 elif Lik_BrlDown > Lik_BrlCurr: #this "while" section decreases each
                     BrlCurr = BrlDown #value by step diff each time the "if" statement is met
                 BrlUp = BrlCurr + diff            
                 BrlDown = BrlCurr - diff  
-                marg_BrlCurr = sp.linalg.expm(qArray*BrlCurr)
-                marg_BrlUp = sp.linalg.expm(qArray*BrlUp)
-                marg_BrlDown = sp.linalg.expm(qArray*BrlDown)
-                Lik_BrlCurr = marg_BrlCurr[first][last]
-                Lik_BrlUp = marg_BrlUp[first][last]
-                Lik_BrlDown = marg_BrlDown[first][last]
-                #if Lik_BrlCurr < 0: Using this if statement does not seem to help. Better place to put it?
-                    #BrlCurr = 0 
+                Lik_BrlCurr = self.allMargProb(chainLength = BrlCurr)[first][last]
+                Lik_BrlUp = self.allMargProb(chainLength = BrlUp)[first][last]
+                Lik_BrlDown = self.allMargProb(chainLength = BrlDown)[first][last]
+                print Lik_BrlCurr  
             #Here I want to hone the value so I reduce diff by half            
             diff *= 0.5
         return ("Maximum likelihood branchlength for Markov chain given known starting and ending states: \n" + str(BrlCurr)) #I want to get back the Likelihood value
@@ -298,14 +290,15 @@ class contMarkov(object): #This class will contain various methods relevant to c
 
 d = contMarkov()
 
-print d.contMarkovSim()
+#print d.contMarkovSim()[0]
 #print d.conv2Letters()
-print d.allMargProb()
+#print d.allMargProb()
 #print d.margProbList()
 #print d.historyProb()
 print d.optimizeBrl()
 #print d.multCTMC()
 
+#print d.chainStates[0]
 
 
 
