@@ -243,15 +243,15 @@ class contMarkov(object): #This class will contain various methods relevant to c
                 Lik_BrlCurr = marg_BrlCurr[first][last]
                 Lik_BrlUp = marg_BrlUp[first][last]
                 Lik_BrlDown = marg_BrlDown[first][last]
-                if Lik_BrlCurr < 0:
-                    BrlCurr = 0 
+                #if Lik_BrlCurr < 0: Using this if statement does not seem to help. Better place to put it?
+                    #BrlCurr = 0 
             #Here I want to hone the value so I reduce diff by half            
             diff *= 0.5
         return ("Maximum likelihood branchlength for Markov chain given known starting and ending states: \n" + str(BrlCurr)) #I want to get back the Likelihood value
     
     '''
     Below is parallel working code to that of the method above. Not sure why the 
-    method above is not outputting consistent max likelihood branchlength . . .
+    method above is not outputting the same max likelihood branchlength . . .
     
     def MaxLikValofP(n,k,pCurr,diff): 
         
