@@ -49,7 +49,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
                        firstProb = None,
                        wtPDFs = None,
                        multChains = None,
-                       numSims = 50):
+                       numSims = 10):
         self.Q = Q #Q is my rate matrix (all rows sum to zero)
         self.v = v #v is my branch length (or total time)
         if wTimes is None:
@@ -149,6 +149,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
         #print ("Branchlength directly from simulation: " + str(branchlength))
         #return (("List of nucleotide substitutions: \n" + str(self.chainStates)) + "\nList of waiting times between substitutions: \n" + str(self.wTimes))
         return self.chainStates, self.wTimes
+   
     def conv2Letters(self):        
         letters = [str(cs) for cs in self.chainStates]
         letters = [s.replace('0','A') for s in letters] #Converting numbers to the nucleotides they represent. Much easier to work with numbers for everything above. Thanks to Marco for finding this syntax!
@@ -169,6 +170,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
         return self.margArray
         #How do I return the description for an array?
         #Finally got this to work!!!
+        
      
     def margProbList(self): #gives a list of the four marginal probabilities (1/nucleotide transition)
         self.mpList = []        
@@ -212,11 +214,12 @@ class contMarkov(object): #This class will contain various methods relevant to c
        
     
     
-    def optimizeBrl(self, BrlCurr=0.2, diff=0.01): #This function is very similar to my earlier optimization function. Goal: find most likely branchlength given a starting and ending state.
-        first = self.chainStates[0]
-        last = self.chainStates[-1]
+    def optimizeBrl(self, BrlCurr=0.5, diff=0.01,thresh=0.0001): #This function is very similar to my earlier optimization function. Goal: find most likely branchlength given a starting and ending state.
+        
         #If BrlCurr is <0 ==0 need to fix
-        while diff > 0.0001: #This while statement limits the resolution of the optimization (and prevents getting stuck in the second while loop)
+        while diff > thresh: #This while statement limits the resolution of the optimization (and prevents getting stuck in the second while loop)
+            first = self.chainStates[0]
+            last = self.chainStates[-1]            
             BrlUp = BrlCurr + diff            
             BrlDown = BrlCurr - diff
             qArray = np.squeeze(np.asarray(self.Q))#Could not get matrix exponentiation to work, so I tried grabbing this line of code from Glaucia 
@@ -240,15 +243,49 @@ class contMarkov(object): #This class will contain various methods relevant to c
                 Lik_BrlCurr = marg_BrlCurr[first][last]
                 Lik_BrlUp = marg_BrlUp[first][last]
                 Lik_BrlDown = marg_BrlDown[first][last]
-                if BrlCurr < 0:
-                    #BrlCurr = 0 This results in endless loop
-                    return "Invalid Branch Length"
+                if Lik_BrlCurr < 0:
+                    BrlCurr = 0 
             #Here I want to hone the value so I reduce diff by half            
             diff *= 0.5
-            
         return ("Maximum likelihood branchlength for Markov chain given known starting and ending states: \n" + str(BrlCurr)) #I want to get back the Likelihood value
     
+    '''
+    Below is parallel working code to that of the method above. Not sure why the 
+    method above is not outputting consistent max likelihood branchlength . . .
     
+    def MaxLikValofP(n,k,pCurr,diff): 
+        
+        while diff > 0.0001:
+            pUp=pCurr+diff
+            pDown=pCurr-diff    
+            Lik_pCurr = binomialPMF(n,pCurr,k)
+            Lik_pUp = binomialPMF(n,pUp,k)
+            Lik_pDown = binomialPMF(n,pDown,k)
+                         
+            while Lik_pCurr < Lik_pUp or Lik_pCurr < Lik_pDown:
+                if Lik_pUp > Lik_pCurr:         
+                    pCurr = pUp #value by step diff each time the "if" statement is met                
+                elif Lik_pDown > Lik_pCurr: #this "while" section decreases each
+                    pCurr = pDown #value by step diff each time the "if" statement is met
+                pUp=pCurr+diff
+                pDown=pCurr-diff    
+                Lik_pCurr = binomialPMF(n,pCurr,k)
+                Lik_pUp = binomialPMF(n,pUp,k)
+                Lik_pDown = binomialPMF(n,pDown,k)  
+            #Here I want to hone the value so I reduce diff by half            
+            diff *= 0.5
+        return pCurr #I want to get back the p value
+        
+    maxLikValP = MaxLikValofP(3,2,0.9,0.4) #This seems to return the right value
+    print maxLikValP
+    '''
+
+
+
+
+
+
+
     def multCTMC(self): #This method will allow me to run many continuous Markov simulations and store the results as a list of lists
         for int in range(self.numSims):
             self.multChains.append(self.contMarkovSim()[0]) #borrowed Oscar's syntax here
@@ -261,13 +298,13 @@ class contMarkov(object): #This class will contain various methods relevant to c
 
 d = contMarkov()
 
-#print d.contMarkovSim()
+print d.contMarkovSim()
 #print d.conv2Letters()
-#print d.allMargProb()
+print d.allMargProb()
 #print d.margProbList()
 #print d.historyProb()
 print d.optimizeBrl()
-print d.multCTMC()
+#print d.multCTMC()
 
 
 
