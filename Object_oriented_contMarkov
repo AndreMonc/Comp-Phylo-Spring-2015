@@ -242,9 +242,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
         return ("Maximum likelihood branchlength for Markov chain given known starting and ending states: \n" + str(BrlCurr)) #I want to get back the Likelihood value
     
     '''
-    Below is parallel working code to that of the method above. Not sure why the 
-    method above is not outputting the same max likelihood branchlength . . .
-    
+    Below is parallel working code to that of the method above. 
     def MaxLikValofP(n,k,pCurr,diff): 
         
         while diff > 0.0001:
