@@ -215,31 +215,31 @@ class contMarkov(object): #This class will contain various methods relevant to c
        
     
     
-    def optimizeBrl(self, BrlCurr=0.5, diff=0.1,thresh=0.0001): #This function is very similar to my earlier optimization function. Goal: find most likely branchlength given a starting and ending state.
+    def optimizeBrl(self, BrlCurr=0.5, diff=0.01,thresh=0.001): #This function is very similar to my earlier optimization function. Goal: find most likely branchlength given a starting and ending state.
       
         while diff > thresh: #This while statement limits the resolution of the optimization (and prevents getting stuck in the second while loop)
             first = self.chainStates[0]
             last = self.chainStates[-1]            
             BrlUp = BrlCurr + diff            
             BrlDown = BrlCurr - diff
-            if BrlCurr < 0: 
-                BrlCurr = 0 
+            if BrlDown < 0: 
+                BrlDown = 0 
             Lik_BrlCurr = self.allMargProb(chainLength = BrlCurr)[first][last]
             Lik_BrlUp = self.allMargProb(chainLength = BrlUp)[first][last]
             Lik_BrlDown = self.allMargProb(chainLength = BrlDown)[first][last]
-            while Lik_BrlCurr < Lik_BrlUp or Lik_BrlCurr < Lik_BrlDown and Lik_BrlCurr < 1:   
+            while Lik_BrlCurr < Lik_BrlUp or Lik_BrlCurr < Lik_BrlDown:   
                 if Lik_BrlUp > Lik_BrlCurr:         
                     BrlCurr = BrlUp #value by step diff each time the "if" statement is met                
                 elif Lik_BrlDown > Lik_BrlCurr: #this "while" section decreases each
                     BrlCurr = BrlDown #value by step diff each time the "if" statement is met
                 BrlUp = BrlCurr + diff            
                 BrlDown = BrlCurr - diff  
-                if BrlCurr < 0: 
-                    BrlCurr = 0 
+                if BrlDown < 0: 
+                    BrlDown = 0 
                 Lik_BrlCurr = self.allMargProb(chainLength = BrlCurr)[first][last]
                 Lik_BrlUp = self.allMargProb(chainLength = BrlUp)[first][last]
                 Lik_BrlDown = self.allMargProb(chainLength = BrlDown)[first][last]
-                print BrlCurr, Lik_BrlCurr  #Shows that every now and then the likelihood values shoot off to infinity . . .
+                #print BrlCurr, Lik_BrlCurr  #Shows that every now and then the likelihood values shoot off to infinity . . .
             #Here I want to hone the value so I reduce diff by half            
             diff *= 0.5
         #return ("Maximum likelihood branchlength for Markov chain given known starting and ending states: \n" + str(BrlCurr)) #I want to get back the Likelihood value
