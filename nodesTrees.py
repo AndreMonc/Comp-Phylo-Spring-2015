@@ -135,7 +135,7 @@ class Tree:
 
 
 
-    '''
+    
     # Write a recursive function to calculate the total tree length (the sum of
     # all the branch lengths). Again, the root node of a tree should be the only 
     # argument the first time this function is called. Due next Tues (3/17).
@@ -143,6 +143,18 @@ class Tree:
         """
         A method to calculate and return total tree length.
         """
+        totbrl = 0
+        if node.children is not None:
+            for child in node.children:
+                totbrl = totbrl + self.treeLength(child)
+        else:
+            node.brl + totbrl
+        return node.brl + totbrl
+        
+     
+                
+            
+        
  
  
 
@@ -187,8 +199,11 @@ class Tree:
         This method prints out the names of the tips and their associated
         sequences as an alignment (matrix).
         """
-    '''
+    
         
         
 i=Tree()
-i.printNames(node=i.root)
+#i.printNames(node=i.root)
+
+h = i.treeLength(node=i.root)
+print h
