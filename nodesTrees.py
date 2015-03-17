@@ -27,7 +27,7 @@ class Node:
             self.children = children
         
         
-        
+'''        
 # ---> Creating and linking nodes <---
  
 # Creating nodes to build this simple three-taxon tree: ((spA,spB),spC)
@@ -76,7 +76,7 @@ for child in root.children:
 # organizes methods associated with them.
 
 
-
+'''
 class Tree:
     """
     Defines a class of phylogenetic tree, consisting of linked Node objects.
@@ -126,7 +126,7 @@ class Tree:
         
         We worked out a version of this code on the whiteboard in class.            
         """
-        if len(node.children) > 0: #Ensure that all internal nodes run through recursion. Terminal nodes will go to else.
+        if len(node.children) > 0: #Wasn't sure how to set up this first line. Borrowed from Glaucia. It ensures that all internal nodes run through recursion. Terminal nodes will go to else.
             for child in node.children: #iterating through each descendent of the given node  
                 self.printNames(child) #This is the key statement. It causes the method to restart on the children nodes.
         else: 
@@ -190,6 +190,5 @@ class Tree:
     '''
         
         
-x = Tree()
-x.printNames(x.root) #Not functioning properly yet. Outputting all terminals twice along with ancB
-#
+i=Tree()
+i.printNames(node=i.root)
