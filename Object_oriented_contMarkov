@@ -49,7 +49,7 @@ class contMarkov(object): #This class will contain various methods relevant to c
                        firstProb = None,
                        wtPDFs = None,
                        multChains = None,
-                       numSims = 15):
+                       numSims = 10):
         self.Q = Q #Q is my rate matrix (all rows sum to zero)
         self.v = v #v is my branch length (or total time)
         self.numSims = numSims
@@ -257,9 +257,9 @@ class contMarkov(object): #This class will contain various methods relevant to c
         while diff > thresh: #This while statement limits the resolution of the optimization (and prevents getting stuck in the second while loop)
             firstStates = []
             lastStates = []            
-            #for cs in self.multChains: #I want to use this code, but I am troubleshooting with the fixed sites variable below (same sites that Glaucia used)                                        
-            sites = [[0,1,3,1,2,0],[1,2,1,3,2,3,0,2,0],[0,3,2,3,1],[1,0,2,1],[3,2,1,3],[2,1,2,3,1,2],[1,3,2,0,2,1],[2,3,1,0,2,0],[0,1,2,3,0,1]]
-            for cs in sites: #Will change "sites" to self.multChains once I have the method functioning properly 
+            for cs in self.multChains: #Earlier I was troubleshooting with the fixed sites variable below (same sites that Glaucia used)                                        
+            #sites = [[0,1,3,1,2,0],[1,2,1,3,2,3,0,2,0],[0,3,2,3,1],[1,0,2,1],[3,2,1,3],[2,1,2,3,1,2],[1,3,2,0,2,1],[2,3,1,0,2,0],[0,1,2,3,0,1]]
+            #for cs in sites: #Will change "sites" to self.multChains once I have the method functioning properly 
                 first = cs[0]
                 last = cs[-1] 
                 firstStates.append(first)
@@ -274,15 +274,16 @@ class contMarkov(object): #This class will contain various methods relevant to c
             for f,l in zip (firstStates,lastStates): #Thanks to Glaucia for this line's syntax
                 Lik_BrlCurr1 = self.allMargProb(chainLength = BrlCurr)[f][l]
                 currLikList.append(Lik_BrlCurr1)
-                Lik_BrlCurr= functools.reduce(operator.mul, currLikList, 1)
+            #print currLikList
             for f,l in zip (firstStates,lastStates):
                 Lik_BrlDown1 = self.allMargProb(chainLength = BrlDown)[f][l]
                 downLikList.append(Lik_BrlDown1)
-                Lik_BrlDown= functools.reduce(operator.mul, downLikList, 1)
             for f,l in zip (firstStates,lastStates):
                 Lik_BrlUp1 = self.allMargProb(chainLength = BrlUp)[f][l]
                 upLikList.append(Lik_BrlUp1)
-                Lik_BrlUp= functools.reduce(operator.mul, upLikList, 1)
+            Lik_BrlCurr= functools.reduce(operator.mul, currLikList, 1)
+            Lik_BrlDown= functools.reduce(operator.mul, downLikList, 1)
+            Lik_BrlUp= functools.reduce(operator.mul, upLikList, 1)
             while Lik_BrlCurr < Lik_BrlUp or Lik_BrlCurr < Lik_BrlDown:   
                 if Lik_BrlUp > Lik_BrlCurr:         
                     BrlCurr = BrlUp #value by step diff each time the "if" statement is met                
@@ -292,18 +293,21 @@ class contMarkov(object): #This class will contain various methods relevant to c
                 BrlDown = BrlCurr - diff  
                 if BrlDown < 0: 
                     BrlDown = 0 
-                for f,l in zip (firstStates,lastStates):
+                currLikList = []
+                downLikList = []
+                upLikList = []
+                for f,l in zip (firstStates,lastStates): #Thanks to Glaucia for this line's syntax
                     Lik_BrlCurr1 = self.allMargProb(chainLength = BrlCurr)[f][l]
                     currLikList.append(Lik_BrlCurr1)
-                    Lik_BrlCurr= functools.reduce(operator.mul, currLikList, 1)
                 for f,l in zip (firstStates,lastStates):
                     Lik_BrlDown1 = self.allMargProb(chainLength = BrlDown)[f][l]
                     downLikList.append(Lik_BrlDown1)
-                    Lik_BrlDown= functools.reduce(operator.mul, downLikList, 1)
                 for f,l in zip (firstStates,lastStates):
                     Lik_BrlUp1 = self.allMargProb(chainLength = BrlUp)[f][l]
                     upLikList.append(Lik_BrlUp1)
-                    Lik_BrlUp= functools.reduce(operator.mul, upLikList, 1)
+                Lik_BrlCurr= functools.reduce(operator.mul, currLikList, 1)
+                Lik_BrlDown= functools.reduce(operator.mul, downLikList, 1)
+                Lik_BrlUp= functools.reduce(operator.mul, upLikList, 1)
             diff *= 0.5 #Here I want to hone the value so I reduce diff by half 
         return BrlCurr, Lik_BrlCurr
         
@@ -319,10 +323,11 @@ d = contMarkov()
 #print d.historyProb()
 #print d.optimizeBrl()
 
-#here I am testing the same values that Glaucia used for BrlCurr. Her outputs are consistently 0.49. 
-print d.mulOptimizeBrl(BrlCurr = 0.3) #0.456
-print d.mulOptimizeBrl(BrlCurr = 1) #0.511
-print d.mulOptimizeBrl(BrlCurr = 5) #4.08?
+
+print d.mulOptimizeBrl(BrlCurr = 5) 
+print d.mulOptimizeBrl(BrlCurr = 0.3) 
+print d.mulOptimizeBrl(BrlCurr = 1) 
+
 
 
 
