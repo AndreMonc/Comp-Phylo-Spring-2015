@@ -192,3 +192,4 @@ class Tree:
         
 x = Tree()
 x.printNames(x.root) #Not functioning properly yet. Outputting all terminals twice along with ancB
+#
