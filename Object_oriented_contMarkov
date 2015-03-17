@@ -237,9 +237,9 @@ class contMarkov(object): #This class will contain various methods relevant to c
             Lik_BrlDown = self.allMargProb(chainLength = BrlDown)[first][last]
             while Lik_BrlCurr < Lik_BrlUp or Lik_BrlCurr < Lik_BrlDown:   
                 if Lik_BrlUp > Lik_BrlCurr:         
-                    BrlCurr = BrlUp #value by step diff each time the "if" statement is met                
+                    BrlCurr = BrlUp #change value by step diff each time the "if" statement is met                
                 elif Lik_BrlDown > Lik_BrlCurr: #this "while" section decreases each
-                    BrlCurr = BrlDown #value by step diff each time the "if" statement is met
+                    BrlCurr = BrlDown #change value by step diff each time the "if" statement is met
                 BrlUp = BrlCurr + diff            
                 BrlDown = BrlCurr - diff  
                 if BrlDown < 0: 
@@ -281,21 +281,21 @@ class contMarkov(object): #This class will contain various methods relevant to c
             for f,l in zip (firstStates,lastStates):
                 Lik_BrlUp1 = self.allMargProb(chainLength = BrlUp)[f][l]
                 upLikList.append(Lik_BrlUp1)
-            Lik_BrlCurr= functools.reduce(operator.mul, currLikList, 1)
-            Lik_BrlDown= functools.reduce(operator.mul, downLikList, 1)
-            Lik_BrlUp= functools.reduce(operator.mul, upLikList, 1)
+            Lik_BrlCurr= functools.reduce(operator.mul, currLikList, 1)#Multiplying all likelihood values together in list
+            Lik_BrlDown= functools.reduce(operator.mul, downLikList, 1)#Multiplying all likelihood values together in list
+            Lik_BrlUp= functools.reduce(operator.mul, upLikList, 1)#Multiplying all likelihood values together in list
             while Lik_BrlCurr < Lik_BrlUp or Lik_BrlCurr < Lik_BrlDown:   
                 if Lik_BrlUp > Lik_BrlCurr:         
-                    BrlCurr = BrlUp #value by step diff each time the "if" statement is met                
+                    BrlCurr = BrlUp #change value by step diff each time the "if" statement is met                
                 elif Lik_BrlDown > Lik_BrlCurr: #this "while" section decreases each
-                    BrlCurr = BrlDown #value by step diff each time the "if" statement is met
+                    BrlCurr = BrlDown #change value by step diff each time the "if" statement is met
                 BrlUp = BrlCurr + diff            
                 BrlDown = BrlCurr - diff  
                 if BrlDown < 0: 
                     BrlDown = 0 
-                currLikList = []
-                downLikList = []
-                upLikList = []
+                currLikList = [] #Need to reset list
+                downLikList = []#Need to reset list
+                upLikList = []#Need to reset list
                 for f,l in zip (firstStates,lastStates): #Thanks to Glaucia for this line's syntax
                     Lik_BrlCurr1 = self.allMargProb(chainLength = BrlCurr)[f][l]
                     currLikList.append(Lik_BrlCurr1)
@@ -305,9 +305,9 @@ class contMarkov(object): #This class will contain various methods relevant to c
                 for f,l in zip (firstStates,lastStates):
                     Lik_BrlUp1 = self.allMargProb(chainLength = BrlUp)[f][l]
                     upLikList.append(Lik_BrlUp1)
-                Lik_BrlCurr= functools.reduce(operator.mul, currLikList, 1)
-                Lik_BrlDown= functools.reduce(operator.mul, downLikList, 1)
-                Lik_BrlUp= functools.reduce(operator.mul, upLikList, 1)
+                Lik_BrlCurr= functools.reduce(operator.mul, currLikList, 1)#Multiplying all likelihood values together in list
+                Lik_BrlDown= functools.reduce(operator.mul, downLikList, 1)#Multiplying all likelihood values together in list
+                Lik_BrlUp= functools.reduce(operator.mul, upLikList, 1)#Multiplying all likelihood values together in list
             diff *= 0.5 #Here I want to hone the value so I reduce diff by half 
         return BrlCurr, Lik_BrlCurr
         
