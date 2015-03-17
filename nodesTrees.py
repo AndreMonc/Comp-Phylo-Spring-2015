@@ -142,7 +142,12 @@ class Tree:
     def treeLength(self,node):
         """
         A method to calculate and return total tree length.
+        Below is similar to the code that Glaucia/Marco suggested in class,
+        but I added an else statement and a return outside the forloop. To me,
+        this is more intuitive and it gives the same result (though it takes
+        slightly more code).
         """
+        
         totbrl = 0
         if node.children is not None:
             for child in node.children:
