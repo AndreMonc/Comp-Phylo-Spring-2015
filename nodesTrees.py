@@ -1,5 +1,5 @@
 from __future__ import division
-#import contMarkov
+import contMark
 
 """
 Exercise 6 - Creating and Using Node and Tree Classes
@@ -155,14 +155,8 @@ class Tree:
         else:
             node.brl + totbrl
         return node.brl + totbrl
-        
-     
                 
             
-        
- 
- 
-
     # Write a recursive function that takes the root node as one of its arguments
     # and prints out a parenthetical (Newick) tree string. Due next Tues (3/17).
     
@@ -171,7 +165,23 @@ class Tree:
         A method of a Tree object that will print out the Tree as a 
         parenthetical string (Newick format).
         """
+        newick = "(" #This is open parentheses will be the start of all newick strings
+        if node.children == []: #If there are no offspring for a given node, then ...
+            return node.name + ":" + str(node.brl) #I want to simply get name:branchlength leading up to that terminal node
+        else: 
+            for c in node.children:
+                if node.children[-1] == c:
+                    newick = newick + self.newick(c) #I want the last-in-the-list offspring of a node to have no punctuation associated with it
+                else:
+                    newick = newick + self.newick(c) + "," #I want non-last-in-the-list offspring to have a comma after their names
+            if node.brl != 0:
+                newick += "):" + str(node.brl) #For branchlengths associated with an internal node I want to print that brl outside that parentheses.
+            else:
+                newick += ")" #If no brl associated with that internal node (specifically, the root), then I only want a parenthesis to close the newick string
+            return newick
 
+                
+        
 
 
     # Now, let's write a recursive function to simulate sequence evolution along a
@@ -211,4 +221,9 @@ i=Tree()
 #i.printNames(node=i.root)
 
 h = i.treeLength(node=i.root)
-print h
+#print h
+
+k = i.newick(node=i.root)
+print k
+d = contMark.contMarkov()
+
