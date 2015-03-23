@@ -149,11 +149,11 @@ class Tree:
         """
         
         totbrl = 0
-        if node.children is not None:
-            for child in node.children:
-                totbrl = totbrl + self.treeLength(child)
+        if node.children is not None: #(If the node is an internal node)
+            for child in node.children: 
+                totbrl = totbrl + self.treeLength(child) #Recursively add the branch length leading up to each internal node
         else:
-            node.brl + totbrl
+            node.brl + totbrl #Add branch length leading up to each terminal node
         return node.brl + totbrl
                 
             
@@ -221,7 +221,7 @@ i=Tree()
 #i.printNames(node=i.root)
 
 h = i.treeLength(node=i.root)
-#print h
+print h
 
 k = i.newick(node=i.root)
 print k
