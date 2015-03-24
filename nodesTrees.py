@@ -76,7 +76,11 @@ for child in root.children:
 # organizes methods associated with them.
 
 
+
+
 '''
+
+
 class Tree:
     """
     Defines a class of phylogenetic tree, consisting of linked Node objects.
@@ -163,22 +167,22 @@ class Tree:
     def newick(self,node):
         """
         A method of a Tree object that will print out the Tree as a 
-        parenthetical string (Newick format).
+        parenthetical string (Newick format). Based on Subir's code.
         """
-        newick = "(" #This is open parentheses will be the start of all newick strings
+        newickString = "(" #This is open parentheses will be the start of all newick strings
         if node.children == []: #If there are no offspring for a given node, then ...
             return node.name + ":" + str(node.brl) #I want to simply get name:branchlength leading up to that terminal node
         else: 
             for c in node.children:
                 if node.children[-1] == c:
-                    newick = newick + self.newick(c) #I want the last-in-the-list offspring of a node to have no punctuation associated with it
+                    newickString += self.newick(c) #I want the last-in-the-list offspring of a node to have no punctuation associated with it
                 else:
-                    newick = newick + self.newick(c) + "," #I want non-last-in-the-list offspring to have a comma after their names
+                    newickString += self.newick(c) + "," #I want non-last-in-the-list offspring to have a comma after their names
             if node.brl != 0:
-                newick += "):" + str(node.brl) #For branchlengths associated with an internal node I want to print that brl outside that parentheses.
+                newickString += "):" + str(node.brl) #For branchlengths associated with an internal node I want to print that brl outside that parentheses.
             else:
-                newick += ")" #If no brl associated with that internal node (specifically, the root), then I only want a parenthesis to close the newick string
-            return newick
+                newickString += ")" #If no brl associated with that internal node (specifically, the root), then I only want a parenthesis to close the newick string
+            return newickString
 
                 
         
@@ -196,23 +200,43 @@ class Tree:
     
     # Try to get this simulator and associated functions working by next Thurs. (3/19)    
     
-    def setModels(self,node):
-        """
-        This method of a Tree object defines a ctmc object associated with all
-        nodes that have a branch length (i.e., all but the root).
-        """
-
+    #def setModels(self,node):
+        #Kind of lost on this one
+        
+        
 
     def simulate(self,node):
+        
         """
         This method simulates evolution along the branches of a tree, taking
         the root node as its initial argument.
+        
+        Work in progress
         """
-             
-    def printSeqs(self,node):
+        ListoLists = [] #This list will contain the simulated chains of each node 
+        ListNames = []
+        if node.parent is None: #This line ensures that I am dealing with the root
+            for c in node.children:
+                d = contMark.contMarkov(v=c.brl)
+                e = d.contMarkovSim()
+                self.simulate(node=c)
+                ListoLists.append(e)
+                ListNames.append(node.name)
+        else:
+            for c in node.children: #Here I specificy internal nodes as the location of simulation
+                d = contMark.contMarkov(v=c.brl)
+                e = d.contMarkovSim()
+                ListoLists.append(e)
+                ListNames.append(node.name)
+                self.simulate(node=c)
+        return ListoLists, ListNames         
+        
+        
+    #def printSeqs(self,node):
         """
         This method prints out the names of the tips and their associated
         sequences as an alignment (matrix).
+        Not been able to figure out previous methods yet. 
         """
     
         
@@ -221,9 +245,13 @@ i=Tree()
 #i.printNames(node=i.root)
 
 h = i.treeLength(node=i.root)
-print h
+#print ("The tree length is: " + str(h))
 
 k = i.newick(node=i.root)
-print k
-d = contMark.contMarkov()
+#print ("The newick string is: " + str(k))
+
+
+f = i.simulate(node=i.root)
+print f
+
 
