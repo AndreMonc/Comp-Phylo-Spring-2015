@@ -9,7 +9,7 @@ Exercise 6 - Creating and Using Node and Tree Classes
 """
 
 '''
-Written with substantial help from Subir.
+Written with help from Subir.
 '''
 
 
@@ -28,6 +28,7 @@ class Node(object):
             self.sequence = []
         else:
             self.sequence = sequence
+        
 
 
 class Tree(Node):
@@ -38,11 +39,11 @@ class Tree(Node):
     def __init__(self, stringNewick):
         self.root = Node("root")
         self.divideNewick(stringNewick, self.root) #Divides newickString in order to create a tree with name+branchlength info associated with each node
-        #self.setModels(self.root) #I've set the default starting sequence length to 10 (each of the 10 sites undergoes a Markov chain simulation. Default qMatrix is that in the Huelsenbeck reading.)
+        self.setModels(self.root) #I've set the default starting sequence length to 10 (each of the 10 sites undergoes a Markov chain simulation. Default qMatrix is that in the Huelsenbeck reading.)
         #Also, I've set the root to always be "node" in the setModels method   
     
     
-    def divideNewick(self, stringNewick ="((spA:0.1, spB:0.1):0.3, (spC:0.03, spD:0.03):0.05)", root = "Ancient"):
+    def divideNewick(self, stringNewick, root):
         """
         The point of this method is to take a newick-formatted string of 
         bases+branchlengths and store name and brl info for each node (the brl 
@@ -194,7 +195,6 @@ class Tree(Node):
         sequences as an alignment (matrix).
         """
         if node.children == []:
-            #print ("The simulated sequence for" + str(node.name) "is: " + str(node.sequence)
             print node.name , node.sequence
         for child in node.children:
             self.printSeqs(child)
@@ -202,25 +202,31 @@ class Tree(Node):
     
     
     
-stringNewick = "((spA:0.5, spB:0.5):0.3, (spC:0.03, spD:0.03):0.05)"     
+stringNewick = "((spA:0.9, spB:0.5):0.3, (spC:0.03, spD:0.03):0.05)"     
      
 i=Tree(stringNewick)
 
+print ("The simulated sequences for each species:")
+i.printSeqs(i.root)
 
+print ("Name of each species in tree:")
 i.printNames(node=i.root)
 
-h = i.treeLength(node=i.root)
-print ("The tree length is: " + str(h))
+print ("The tree length is: ")
+print i.treeLength(node=i.root)
 
-#k = i.newick(node=i.root)
-#print ("The newick string is: " + str(k))
+print ("The newick string is: ") 
+print i.newick(node=i.root)
 
-x = i.setModels(node=i.root)
 
-i.printSeqs(i.root)
-#f = i.simulate(node=i.root)
-#print f
 
-#print i.divideNewick
+
+
+
+
+
+
+
+
 
 
