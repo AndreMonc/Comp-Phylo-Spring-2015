@@ -58,12 +58,12 @@ class DNAevo(object):
 class contMarkov(DNAevo):
     #This first method will actually perform the continuous Markov chain simulation
     def cmSim(self, startSeq=None, seqL = 10):
-        finalStateList = "" #The last states of each simulation for a given site
+        finalStateString = "" #The last states of each simulation for a given site
         if startSeq is None:
             startSeq = self.discSamp(self.bases,self.statfreq, outputLength = seqL) #Here I generate a sequence (in a list) of length 30 based on marginal probabilities
             startSeq = ''.join(startSeq) #This handy line converts the sequence list to a sequence string
         else:
-            startSeq = startSeq[0] 
+            startSeq = startSeq[0]
         for num in range(len(startSeq)):
             startNuc = startSeq[num]
             totalBrl, wTime = 0, 0
@@ -75,11 +75,10 @@ class contMarkov(DNAevo):
                 potentStates3 = list(filter(lambda x:x != startNuc, self.bases)) #include all nucleotides in potentStates except the startNuc
                 probs3 = list(filter(lambda x:x != -1, self.transProbs[startNuc]))
                 nextNuc = self.discSamp(potentStates3, probs3)
-                print nextNuc                
                 totalBrl += wTime #updates the total branch length
-                #startNuc = nextNuc[0] #resets the starting nucleotide to the one select by the discSample method. Does this until while loop broken. Then startNuc set to second site . . .
-            finalStateList += stateList[-1]
-        return finalStateList
+                startNuc = nextNuc[0] #resets the starting nucleotide to the one select by the discSample method. Does this until while loop broken. Then startNuc set to second site . . .
+            finalStateString += stateList[-1]
+        return finalStateString
     
     def margProbMat(self, branchlength=100):
         return (expm(numpy.array(self.Qmatrix) * branchlength))
@@ -91,7 +90,7 @@ class contMarkov(DNAevo):
 
 d = contMarkov()
 #print d.discSamp(nuclist = d.bases, problist = [0.1, 0.7, 0.1, 0.1])
-print d.transProbs
+#print d.transProbs
 #print d.diagonals
 print d.cmSim()
 
