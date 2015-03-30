@@ -9,7 +9,7 @@ Exercise 6 - Creating and Using Node and Tree Classes
 """
 
 '''
-Written with help from Subir.
+Written with substantial help from Subir.
 '''
 
 
@@ -23,7 +23,7 @@ class Node(object):
             self.children = []
         else:
             self.children = children
-        self.branchlength = branchlength
+        self.brl = branchlength
         if sequence is None:
             self.sequence = []
         else:
@@ -38,20 +38,20 @@ class Tree(Node):
     def __init__(self, stringNewick):
         self.root = Node("root")
         self.divideNewick(stringNewick, self.root) #Divides newickString in order to create a tree with name+branchlength info associated with each node
-        self.setModels(self.root) #I've set the default starting sequence length to 10 (each of the 10 sites undergoes a Markov chain simulation. Default qMatrix is that in the Huelsenbeck reading.)
+        #self.setModels(self.root) #I've set the default starting sequence length to 10 (each of the 10 sites undergoes a Markov chain simulation. Default qMatrix is that in the Huelsenbeck reading.)
         #Also, I've set the root to always be "node" in the setModels method   
     
     
-    def divideNewick(self, stringNewick ="((spA:0.1, spB:0.1):0.3, (spC:0.03, spD:0.03):0.05)", root = "Oldie"):
+    def divideNewick(self, stringNewick ="((spA:0.1, spB:0.1):0.3, (spC:0.03, spD:0.03):0.05)", root = "Ancient"):
         """
         The point of this method is to take a newick-formatted string of 
         bases+branchlengths and store name and brl info for each node (the brl 
         leading up to that node).
         """
         stringNewick = stringNewick.replace(" ", "")[1:-1] #Remove spaces and outside parentheses from the newick string
-        print "String Newick: " + stringNewick        
+        #print "String Newick: " + stringNewick        
         x = 0
-        while stringNewick.count(",") != 0: #As long as there are still multiple terminal nodes in the string, this loop will continue
+        if stringNewick.count(",") != 0: #As long as there are still multiple terminal nodes in the string, this loop will continue
             for pos in range(len(stringNewick)): #Purpose of this loop is to find the comma between sets of parentheses (so I can divide branches)
                 if stringNewick[pos] == "(":
                     x += 1 #For every open parenthesis in the newick string I want to add 1 to x
@@ -71,7 +71,7 @@ class Tree(Node):
                                 storedNode = Node(name=stringNewick, parent=root)
                                 root.children.append(storedNode) 
                                 self.divideNewick(stringNewick, storedNode)
-                        #break # To prevent endless looping
+                        break # To prevent endless looping
     
     
     
@@ -94,6 +94,8 @@ class Tree(Node):
     # Write a recursive function to calculate the total tree length (the sum of
     # all the branch lengths). Again, the root node of a tree should be the only 
     # argument the first time this function is called. 
+
+    
     def treeLength(self,node):
         """
         A method to calculate and return total tree length.
@@ -110,10 +112,11 @@ class Tree(Node):
         else:
             node.brl + totbrl #Add branch length leading up to each terminal node
         return node.brl + totbrl
-                
+             
             
     # Write a recursive function that takes the root node as one of its arguments
     # and prints out a parenthetical (Newick) tree string. Due next Tues (3/17).
+    
     
     def newick(self,node):
         """
@@ -134,7 +137,7 @@ class Tree(Node):
             else:
                 newickString += ")" #If no brl associated with that internal node (specifically, the root), then I only want a parenthesis to close the newick string
             return newickString
-
+    
                 
     # Now, let's write a recursive function to simulate sequence evolution along a
     # tree. This amounts to simply simulating evolution along each branch 
@@ -146,7 +149,7 @@ class Tree(Node):
     # root). Again, it would be best to add the ctmcs as part of the Node
     # constructor, if we know that we'll be simulating data.
     
-       
+     
     def setModels(self, node, Model = None, seqLength = None):
         """
         This method of a Tree object defines a ctmc object that is associated
@@ -164,8 +167,11 @@ class Tree(Node):
             node.sequence = [ctmc.contMarkov(Qmatrix = Model).cmSim()]
         else: #If no model or seqLength is provided by user the default is:
             node.sequence = [ctmc.contMarkov(Qmatrix = Model).cmSim(seqL=seqLength)]
-        self.simulate(node) #this 
+        self.simulate(node) 
+    
 
+
+    
     def simulate(self,node):
         
         """
@@ -179,7 +185,9 @@ class Tree(Node):
             for child in node.children:
                 child.sequence = [ctmc.contMarkov(arbBrl=child.brl).cmSim(startSeq=node.sequence)]
                 self.simulate(child) #The key line that introduces recursion through the whole tree       
-        
+       
+    
+    
     def printSeqs(self,node):
         """
         This method prints out the names of the tips and their associated
@@ -187,23 +195,32 @@ class Tree(Node):
         """
         if node.children == []:
             #print ("The simulated sequence for" + str(node.name) "is: " + str(node.sequence)
-            print (node.name, "\t", node.sequence)
+            print node.name , node.sequence
         for child in node.children:
             self.printSeqs(child)
-        
-stringNewick = "((spA:0.1, spB:0.1):0.3, (spC:0.03, spD:0.03):0.05)"     
+    
+    
+    
+    
+stringNewick = "((spA:0.5, spB:0.5):0.3, (spC:0.03, spD:0.03):0.05)"     
      
 i=Tree(stringNewick)
-#i.printNames(node=i.root)
+
+
+i.printNames(node=i.root)
 
 h = i.treeLength(node=i.root)
-#print ("The tree length is: " + str(h))
+print ("The tree length is: " + str(h))
 
-k = i.newick(node=i.root)
+#k = i.newick(node=i.root)
 #print ("The newick string is: " + str(k))
 
+x = i.setModels(node=i.root)
 
-f = i.simulate(node=i.root)
+i.printSeqs(i.root)
+#f = i.simulate(node=i.root)
 #print f
+
+#print i.divideNewick
 
 
