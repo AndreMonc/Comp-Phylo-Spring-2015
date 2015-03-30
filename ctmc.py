@@ -92,7 +92,7 @@ d = contMarkov()
 #print d.discSamp(nuclist = d.bases, problist = [0.1, 0.7, 0.1, 0.1])
 #print d.transProbs
 #print d.diagonals
-print d.cmSim()
+#print d.cmSim()
 
 
                
