@@ -202,12 +202,18 @@ class Tree(Node):
     
     
     
-stringNewick = "((spA:0.9, spB:0.5):0.3, (spC:0.03, spD:0.03):0.05)"     
+stringNewick = "((spA:0.6, spB:0.6):0.3, (spC:0.03, spD:0.03):0.05)"     
      
 i=Tree(stringNewick)
 
 print ("The simulated sequences for each species:")
 i.printSeqs(i.root)
+
+#Intuitive check: Make sure that species with longer branch lengths have 
+#more differences between their sequences. However, once branch lengths got 
+#longer than ~0.7 I noticed the sequences did not appear more divergent with 
+#increasing branchlength. 
+
 
 print ("Name of each species in tree:")
 i.printNames(node=i.root)
