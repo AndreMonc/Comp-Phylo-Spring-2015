@@ -173,9 +173,9 @@ class Tree(Node):
         elif Model is None and seqLength is not None:
             node.sequence = [ctmc.contMarkov().cmSim(seqL=seqLength)]
         elif Model is not None and seqLength is None:
-            node.sequence = [ctmc.contMarkov(Qmatrix = Model).cmSim()]
+            node.sequence = [ctmc.contMarkov(matrix = Model).cmSim()]
         else: #If no model or seqLength is provided by user the default is:
-            node.sequence = [ctmc.contMarkov(Qmatrix = Model).cmSim(seqL=seqLength)]
+            node.sequence = [ctmc.contMarkov(matrix = Model).cmSim(seqL=seqLength)]
         self.simulate(node) 
     
 
@@ -233,7 +233,7 @@ class Likelihood:
     
     def __init__(self, matrix, node, likeli = 0):
         self.matrix = numpy.array(matrix)
-        self.P = self.margProbMat
+        self.P = self.margProbMat()
         self.generator(node) #Finds the conditional probabilities associated with each nucleotide at each node
         self.TreeLike(node) #This calculates the likelihood
         
@@ -247,7 +247,7 @@ class Likelihood:
         brl = [] #list with the branch lengths
         for child in node.children:
             if child.likeli == []:
-                self.generator(child) #Key recursive portion of method
+                self.generator(child) #Key recursive portion of method. Must go to tip and then work backwards.
             conProbs.append(child.likeli)
             brl.append(child.brl)
         node.likeli = self.calcAncMatrix(conProbs[0], conProbs[1], brl[0], brl[1])
@@ -267,9 +267,9 @@ class Likelihood:
         return numpy.array(ancMat)
 
     def TreeLike(self, node):
-        all = (self.P[0].dot(node.likeli.transpose()))
+        finLike = (self.P[0].dot(node.likeli.transpose())) #Multiply with marginal probabilities and add the terms to get total likelihood for each site
         likeli = 1
-        for val in all:
+        for val in finLike:
             likeli *= val
         return likeli
         
@@ -294,7 +294,7 @@ b = Likelihood(matrix, Test.root)
 
 #print b.MP
 
-print b.TreeLike
+print b.TreeLike(Test.root)
 
 #stringNewick = "((spA:0.6, spB:0.6):0.3, (spC:0.03, spD:0.03):0.05)"     
      
