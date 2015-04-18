@@ -5,7 +5,7 @@ import math
 from scipy.linalg import expm #necessary for the matrix exponentiation (to find marginal probabilities)
 
 '''
-Code I wrote with lots of help from Subir. Learned a lot by studying his code.
+Code I wrote with lots of help from Subir. I learned a lot by studying his code.
 Compared to my earlier code, this version of a continuous Markov simulation 
 will be much easier to integrate with simulations on a tree.
 '''
