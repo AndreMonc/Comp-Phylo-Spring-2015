@@ -5,7 +5,7 @@ import math
 from scipy.linalg import expm #necessary for the matrix exponentiation (to find marginal probabilities)
 
 '''
-Code I wrote with lots of help from Subir. I learned a lot by studying his code.
+Code I wrote with lots of help from Subir. Learned a lot by studying his code.
 Compared to my earlier code, this version of a continuous Markov simulation 
 will be much easier to integrate with simulations on a tree.
 '''
@@ -13,13 +13,13 @@ will be much easier to integrate with simulations on a tree.
 class DNAevo(object):
     def __init__(self,
                  bases = ["A","C","G","T"],
-                 Qmatrix =[[-1.916,0.541,0.787,0.588], #Copied Q matrix from Huelsenbeck reading
+                 matrix =[[-1.916,0.541,0.787,0.588], #Copied Q matrix from Huelsenbeck reading
                           [0.148,-1.069,0.415,0.506],
                           [0.286,0.170,-0.591,0.135],
                           [0.525,0.236,0.594,-1.355]], 
                  arbBrl = 1):
         self.bases = bases #Here I set the four nucleotides as the elements that comprise a sequence
-        self.Qmatrix = Qmatrix #Here I set the default Q matrix
+        self.matrix = matrix #Here I set the default Q matrix
         self.arbBrl = arbBrl #Here I set the arbitrary (or default) branchlength for DNA evolution
         
         '''        
@@ -30,7 +30,7 @@ class DNAevo(object):
         transProbs = {} #I store the four transition probabilites in a dict as values with key "base"
         diagonals = {} #I store the diagonals in a dict as values with key "base"
         for nuc in bases:
-            row = Qmatrix[bases.index(nuc)]
+            row = matrix[bases.index(nuc)]
             diagonals[nuc] = -1*min(row)
             transProbs[nuc] = [val/(min(row)*-1) for val in row]
         self.transProbs = transProbs
@@ -60,12 +60,12 @@ class contMarkov(DNAevo):
     def cmSim(self, startSeq=None, seqL = 10):
         finalStateString = "" #The last states of each simulation for a given site
         if startSeq is None:
-            startSeq = self.discSamp(self.bases,self.statfreq, outputLength = seqL) #Here I generate a sequence (in a list) of length 30 based on marginal probabilities
+            startSeq = self.discSamp(self.bases,self.statfreq, outputLength = seqL) #Here I generate a sequence of nucleotides (in a list) of length seqL based on marginal probabilities
             startSeq = ''.join(startSeq) #This handy line converts the sequence list to a sequence string
         else:
-            startSeq = startSeq[0]
+            startSeq = startSeq[0] #Takes the first sequence from a list of lists
         for num in range(len(startSeq)):
-            startNuc = startSeq[num]
+            startNuc = startSeq[num] #iteratively simulates substitution sequences for each of the bases in the sequence
             totalBrl, wTime = 0, 0
             stateList, wTimeList = [], []
             while totalBrl <= self.arbBrl:
@@ -81,7 +81,7 @@ class contMarkov(DNAevo):
         return finalStateString
     
     def margProbMat(self, branchlength=100):
-        return (expm(numpy.array(self.Qmatrix) * branchlength))
+        return (expm(numpy.array(self.matrix) * branchlength))
         
             
             
