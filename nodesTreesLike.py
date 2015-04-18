@@ -6,7 +6,13 @@ from scipy.linalg import expm #necessary for the matrix exponentiation (to find 
 
 
 '''
-Thanks to Subir for substantial help in completing this code!!
+Thanks to Subir for taking the time to help me understand and complete this code!!
+Much of the following code is heavily based on Subir's code. The code below makes
+extensive use of recursion. 
+
+To verify that the code below was working, I used the likelihood worksheets
+and associated info (trans prob matrices, q matrix, tree topology, branchlengths)
+from class. The q matrix was derived from the trans prob matrices.
 '''
 
 
@@ -17,15 +23,15 @@ class Node(object):
         self.name = name
         self.parent = None
         if children is None:
-            self.children = []
+            self.children = [] #setting up storage list for children
         else:
             self.children = children
         self.brl = branchlength
         if sequence is None:
-            self.sequence = []
+            self.sequence = [] #Save the sequences for each species in the tree
         else:
             self.sequence = sequence
-        self.likeli  = [] #to save marginal probs
+        self.likeli  = [] #to save conditional probabilities
         
 
 
@@ -166,6 +172,9 @@ class Tree(Node):
         to change models (i.e., Q-matrix values) I can add that new model as an 
         argument to this method. Otherwise, the default model values is the one 
         given in the Huelsenbeck reading.
+        
+        Purpose of this method is to give increased flexibility to the markov 
+        chain analysis.
         """
         
         if Model is None and seqLength is None:
@@ -201,6 +210,10 @@ class Tree(Node):
         """
         This method prints out the names of the tips and their associated
         sequences as an alignment (matrix).
+        
+        Simple use of recursion. This function continues to call itself until
+        it finds a terminal node. Then it prints the name. Retraces way back
+        through tree.
         """
         if node.children == []:
             print node.name , node.sequence
@@ -210,15 +223,15 @@ class Tree(Node):
     
     
     def assignSeqs(self, node, seqDict):
-        #The purpose of this method is to store in memory the corresponding sequence for each node 
+        #The purpose of this method is to store in memory the corresponding sequence and conditional probs for each node 
         if node.name in seqDict:
             node.sequence = seqDict[node.name] #This line stores the value (sequence) for the given node name. Since I iterate through all node names, I will store all corresponding sequences.
             node.likeli = self.probFinSt(node) #This line stores the conditional probabilities at each node
-        else: #In case the provided node name is not found as a key in the dict, it should have a child as a key in the dict
+        else: 
             for child in node.children:
-                self.assignSeqs(child, seqDict)
+                self.assignSeqs(child, seqDict) #key recursive portion of method: to eventually reach tips of tree and retrace
     
-    def probFinSt(self, node):
+    def probFinSt(self, node): #All this function does is allow for the above assignSeqs method to find and store the conditional probs for each site in the sequence for each species
         finalProbDict = {"A": [1,0,0,0], "C": [0,1,0,0], "G": [0,0,1,0], "T":[0,0,0,1],
                          "B": [1,1,0,0], "D": [1,0,1,0], "E": [1,0,0,1], "F":[0,1,1,0],
                          "H": [0,1,0,1], "I": [1,1,1,0], "J": [1,1,0,1], "K":[0,1,1,1],
@@ -226,7 +239,7 @@ class Tree(Node):
         storage = []
         for base in range(len(node.sequence)):
             storage.append(finalProbDict[node.sequence[base]])
-        return numpy.array(storage)
+        return numpy.array(storage) #(returns matrix of the four conditional probs for the given terminal node for each sequence site associated with that node. Thus, 4x4 matrix for data from likelihood worksheets)
     
 class Likelihood:
     #Goal is to calculate the likelihood of a tree given know species sequences 
@@ -243,34 +256,37 @@ class Likelihood:
         	
  
     def generator(self,node): #Finds the conditional probabilities associated with each nucleotide at each node
-        conProbs = [] #List with conditional probabilities
-        brl = [] #list with the branch lengths
+        '''
+        Because this function calls itself if there are no prob values associated with node, the function goes all the way to the tips first.
+        '''
+        conProbs = [] #List with conditional probabilities (contains two matrices--one associated with each branch above a node)
+        brl = [] #list with the branch lengths--one associated with each branch above a node
         for child in node.children:
             if child.likeli == []:
-                self.generator(child) #Key recursive portion of method. Must go to tip and then work backwards.
+                self.generator(child) #Key recursive portion of method. Must go to tip and then work backwards. 
             conProbs.append(child.likeli)
             brl.append(child.brl)
-        node.likeli = self.calcAncMatrix(conProbs[0], conProbs[1], brl[0], brl[1])
+        node.likeli = self.calcAncMatrix(conProbs[0], conProbs[1], brl[0], brl[1]) #Here I pass the values stored in conProbs and brl to the calcAncMatrix
     
     def calcAncMatrix(self, val0, val1, brl0, brl1): #the values in the argument are passed from the generator method
-            #Purpose is to calculate the probability matrix of an ancestral node, given all known descendents
+        #Purpose is to calculate the probability matrix of an ancestral node, given all known descendents
         matrixFirst = self.margProbMat(branchlength=brl0).transpose() #Here I calculate a p matrix for the first branch. Transpose formats the matrix for use in matrix multiplication.
         matrixSec = self.margProbMat(branchlength=brl1).transpose() #Here I calculate a p matrix for the second branch. Transpose formats the matrix for use in matrix multiplication.
-        multFirst = [y.dot(matrixFirst) for y in val0]
-        multSec = [y.dot(matrixSec) for y in val1]
+        multFirst = [y.dot(matrixFirst) for y in val0] #Here I complete the matrix multiplication of the transition probability matrix with the matrix of conditional probilities for branch 1
+        multSec = [y.dot(matrixSec) for y in val1] #Here I complete the matrix multiplication of the transition probability matrix with the matrix of conditional probilities for branch 2
         ancMat = []
-        for i in range(len(multFirst)):
+        for i in range(len(multFirst)): 
             futureCond = []
             for j in range(len(multFirst[i])):
-                futureCond.append(multFirst[i][j]* multSec[i][j])
+                futureCond.append(multFirst[i][j]* multSec[i][j]) #Multiply branch 1 values with branch 2 values to get conditional probabilities for ancestral node. 
             ancMat.append(futureCond)
-        return numpy.array(ancMat)
+        return numpy.array(ancMat) #Result returned in matrix form, because multiple sites involved.
 
     def TreeLike(self, node):
         finLike = (self.P[0].dot(node.likeli.transpose())) #Multiply with marginal probabilities and add the terms to get total likelihood for each site
         likeli = 1
         for val in finLike:
-            likeli *= val
+            likeli *= val #Multiply likelihood of each site to give total likelihood for tree
         return likeli
         
         
