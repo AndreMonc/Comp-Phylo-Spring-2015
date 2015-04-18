@@ -319,7 +319,7 @@ print b.TreeLike(Test.root)
 #print ("The simulated sequences for each species:")
 #i.printSeqs(i.root)
 
-#Intuitive check: Make sure that species with longer branch lengths have 
+#Intuition check: Make sure that species with longer branch lengths have 
 #more differences between their sequences. However, once branch lengths got 
 #longer than ~0.7 I noticed the sequences did not appear more divergent with 
 #increasing branchlength. 
